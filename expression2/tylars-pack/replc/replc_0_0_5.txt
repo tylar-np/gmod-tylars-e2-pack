@@ -10,8 +10,12 @@
         Control_Handbrake (recommend Pod Controller's Space output)
         Control_Reverser_Forward and Control_Reverser_Back (recommend Pod Controller's D and A outputs for these)
         Control_Safety_Switch (optional - recommend Pod Controller's Alt output - hold to change reverser and handbrake)
+        Control_StartStopEngine - recommend a physical button for this (non toggle). Then wire the pod controller's
+            Enable Buttons and Crosshairs inputs to the pod's Active output.
+        Toggle_ForceHighIdle - (optional) if you wanna force high idle all the time for some reason
+        Toggle_ThrottleSlow (optional) Hold to adjust the throttle slowly. The adjustment rates can be configured.
     
-    Then look through the "Config block" (line 106) and make sure everything looks right to you
+    Then look through the "Config block" (line 90) and make sure everything looks right to you
 ]#
 
 # ====================
