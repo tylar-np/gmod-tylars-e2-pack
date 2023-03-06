@@ -1,0 +1,81 @@
+# =======================================================================================
+# | REFERENCE TABLE - SPEED CONVERSIONS (RepLC)
+# |==============|================|================||=================|=================|
+# | Units/Second | Worldscale MPH | Worldscale KPH || Playerscale MPH | Playerscale KPH |
+# |==============|================|================||=================|=================|
+# | 2347 UPS     | 100 MPH        | 161 KPH        || 133 MPH         | 215 KPH         |
+# | 2229 UPS     |  95 MPH        | 153 KPH        || 127 MPH         | 204 KPH         |
+# | 2112 UPS     |  90 MPH        | 145 KPH        || 120 MPH         | 193 KPH         |
+# | 1994 UPS     |  85 MPH        | 137 KPH        || 113 MPH         | 182 KPH         |
+# | 1877 UPS     |  80 MPH        | 129 KPH        || 107 MPH         | 172 KPH         |
+# | 1760 UPS     |  75 MPH        | 121 KPH        || 100 MPH         | 161 KPH         |
+# | 1642 UPS     |  70 MPH        | 113 KPH        ||  93 MPH         | 150 KPH         |
+# | 1525 UPS     |  65 MPH        | 105 KPH        ||  87 MPH         | 139 KPH         |
+# | 1408 UPS     |  60 MPH        |  97 KPH        ||  80 MPH         | 129 KPH         |
+# | 1290 UPS     |  55 MPH        |  89 KPH        ||  73 MPH         | 118 KPH         |
+# | 1173 UPS     |  50 MPH        |  80 KPH        ||  67 MPH         | 107 KPH         |
+# | 1056 UPS     |  45 MPH        |  72 KPH        ||  60 MPH         |  97 KPH         |
+# |  938 UPS     |  40 MPH        |  64 KPH        ||  53 MPH         |  86 KPH         |
+# |  821 UPS     |  35 MPH        |  56 KPH        ||  47 MPH         |  75 KPH         |
+# |  704 UPS     |  30 MPH        |  48 KPH        ||  40 MPH         |  64 KPH         |
+# |  586 UPS     |  25 MPH        |  40 KPH        ||  33 MPH         |  54 KPH         |
+# |  469 UPS     |  20 MPH        |  32 KPH        ||  27 MPH         |  43 KPH         |
+# |  352 UPS     |  15 MPH        |  24 KPH        ||  20 MPH         |  32 KPH         |
+# |  234 UPS     |  10 MPH        |  16 KPH        ||  13 MPH         |  21 KPH         |
+# |  117 UPS     |   5 MPH        |   8 KPH        ||   7 MPH         |  11 KPH         |
+# =======================================================================================
+# SPEED CONVERSION CALCULATION:
+#   Worldscale UPS to MPH: UPS * (15/352)
+#   Worldscale UPS to KPH: UPS * (12069/176000)
+#   Worldscale UPS to Meters/Sec: UPS * 0.01904831069
+#   Worldscale units to Playerscale units: Worldscale units * (16/12)
+#   Any scale's MPH to KPH: MPH * 1.60934
+# =======================================================================================
+
+
+
+
+
+
+# Example functions:
+
+# Helpers
+function number to_playerscale(Speed:number) {
+    return Speed * 1.33333333333
+}
+
+function number to_worldscale(Speed:number) {
+    return Speed * 0.75
+}
+
+
+
+# Worldscale functions
+function number ups_to_mph(SpeedUPS:number) {
+    return SpeedUPS * 0.04261363636 # 15/352
+}
+
+function number ups_to_kph(SpeedUPS:number) {
+    return SpeedUPS * 0.06857386363 # 12069/176000
+}
+
+function number ups_to_meterspersecond(SpeedUPS:number) {
+    return SpeedUPS * 0.01904831069
+}
+
+
+
+# Playerscale functions
+function number ups_to_mph_playerscale(SpeedUPS:number) {
+    return SpeedUPS * 0.05681818181 # 15/352 * 4/3
+}
+
+function number ups_to_kph_playerscale(SpeedUPS:number) {
+    return SpeedUPS * 0.09143181817 # 12069/176000 * 4/3
+}
+
+function number ups_to_meterspersecond_playerscale(SpeedUPS:number) {
+    return SpeedUPS * 0.02539774758
+}
+
+# RepLC - Tylar

@@ -1,0 +1,220 @@
+@name RepLC v0.0.5 control stand - GP7/GP9/GP16/GP20
+@inputs [Active CPUUsage Downforce DownforceMax EngineStateCode HandbrakeOn HighIdling Notch]:number
+@inputs [NotchRelativeThrottle Ops Reverser SpeedMPH SpeedMPHMax Throttle]:number
+@persist [SELF]:entity
+@persist [BonesSafe]:number
+@persist [IDX_BONE_AFM IDX_BONE_BRAKE IDX_BONE_OPS IDX_BONE_THROTTLE_WHEEL IDX_BONE_REVERSER IDX_BONE_SELECTOR]:number
+@persist [IDX_BONE_SPEED_MPH IDX_BONE_SPEED_MPH_MAX IDX_BONE_THROTTLE IDX_BONE_THROTTLE_RELATIVE]:number
+@persist [IDX_HOLO_DOWNFORCE]:number
+@persist [IDX_SOUND_REVERSER_LEVER]:number
+@persist [IDX_SOUND_HANDBRAKE IDX_SOUND_SELECTOR_LEVER]:number
+@persist [OFFSET_BONE_NEEDLES]:number
+@persist [SCALAR_BONE_OPS SCALAR_MPH_TO_DEG]:number
+@persist [CFG_Sound_Handbrake CFG_Sound_Reverser_Engaged CFG_Sound_Reverser_Neutral CFG_Sound_Selector_Notch]:string
+@persist [State_Downforce_Percent]:number
+@trigger Active CPUUsage EngineStateCode HandbrakeOn HighIdling Notch NotchRelativeThrottle Ops Reverser SpeedMPH SpeedMPHMax Throttle 
+@model models/anytrains/props/detail/cstand_gp9-18-20.mdl
+
+# This is a control stand that is compatible with RepLC 0.0.5.
+# If future versions of RepLC come along that are incompatible, this message and the code will change.
+# Wire the inputs on the stand to the samely-named outputs of the RepLC chip.
+# Then refresh the stand once. Bones will set their initial positions 10 seconds after that.
+
+#[
+    Features:
+        Notch if in fake notch sound mode
+        Handbrake lever
+        Reverser control if in fake notch sound mode
+        Engine run and high idle switches are used to indicate both
+    Gauges:
+        1 - Ops from the E2
+        2 - White needle is throttle percent, red is relative throttle within the current notch if in 
+            fake notch sound mode
+        3 - White needle is speed in MPH, red is top speed in MPH
+            Number on the bottom represents percent of total downforce currently being applied
+        4 - Current CPU time (each notch is 10us)
+]#
+
+#[
+    Model: models/anytrains/props/detail/cstand_gp9-18-20.mdl
+    Bone names in this model: (index/name)
+        0 root
+        1 reverser
+        2 throttle
+        3 throttlewheel
+        4 selector
+        5 selectorwheel
+        6 trainbrake
+        7 independantbrake
+        8 independantbail
+        9 brakecutin
+        10 brakevalve
+        11 horn
+        12 bell
+        13 hdltdimmer
+        14 load
+        15 mainres
+        16 equalres
+        17 brakecyl
+        18 brakepipe
+        19 afm
+        20 blender_implicit
+
+]#
+
+if (BonesSafe & inputClk()) {
+    local Trigger = inputClkName()
+    switch (Trigger) {
+        case "Active",
+            SELF:propNotSolid(Active) # Hides the overlay/halo stuff when in the seat.
+            break
+        case "CPUUsage",
+            SELF:setBoneAngRelative(IDX_BONE_AFM, ang(0, 0, -min(max(0, CPUUsage/2), 440)))
+            break
+        case "EngineStateCode",
+            SELF:setBodygroup(14, EngineStateCode == 1 | EngineStateCode == 2)
+            break
+        case "HandbrakeOn",
+            SELF:setBoneAngRelative(IDX_BONE_BRAKE, ang(HandbrakeOn * 140, 0, 0))
+            soundPlay(IDX_SOUND_HANDBRAKE, 2, CFG_Sound_Handbrake)
+            break
+        case "HighIdling",
+            SELF:setBodygroup(13, HighIdling)
+            break
+        case "Notch",
+            SELF:setBoneAngRelative(IDX_BONE_THROTTLE_WHEEL, ang(Notch*-30, 0, 0))
+            SELF:setBoneAngRelative(IDX_BONE_SELECTOR, ang(Notch*-8.5, 0, 0))
+            soundPlay(IDX_SOUND_SELECTOR_LEVER, 2, CFG_Sound_Selector_Notch)
+            break
+        case "NotchRelativeThrottle",
+            SELF:setBoneAngRelative(IDX_BONE_THROTTLE_RELATIVE, ang(0, 0, NotchRelativeThrottle*-2 + OFFSET_BONE_NEEDLES))
+            break
+        case "Ops",
+            SELF:setBoneAngRelative(IDX_BONE_OPS, ang(0, 0, Ops * SCALAR_BONE_OPS))
+            break
+        case "Reverser",
+            SELF:setBoneAngRelative(IDX_BONE_REVERSER, ang(Reverser*17, 0, 0))
+            soundPlay(IDX_SOUND_REVERSER_LEVER, 2, Reverser == 0 ? CFG_Sound_Reverser_Neutral : CFG_Sound_Reverser_Engaged)
+            break
+        case "SpeedMPH",
+            SELF:setBoneAngRelative(IDX_BONE_SPEED_MPH, ang(0, 0, OFFSET_BONE_NEEDLES - (min(max(0, SpeedMPH - 2), 90) * SCALAR_MPH_TO_DEG)))
+            break
+        case "SpeedMPHMax",
+            SELF:setBoneAngRelative(IDX_BONE_SPEED_MPH_MAX, ang(0, 0, OFFSET_BONE_NEEDLES - (min(max(0, SpeedMPHMax - 2), 90) * SCALAR_MPH_TO_DEG)))
+            break
+        case "Throttle",
+            SELF:setBoneAngRelative(IDX_BONE_THROTTLE, ang(0, 0, Throttle*-2 + OFFSET_BONE_NEEDLES))
+            break
+    }
+}
+
+elseif (clk()) {
+    interval(4000 - (Active * 3000))
+    State_Downforce_Percent = ceil(100 * (Downforce / (max(1, DownforceMax))))
+    holoBodygroup(IDX_HOLO_DOWNFORCE, 1, State_Downforce_Percent == 100 ? 1 : 16)
+    holoBodygroup(IDX_HOLO_DOWNFORCE, 2, State_Downforce_Percent >= 10 ? floor(State_Downforce_Percent/10) : 16)
+    holoBodygroup(IDX_HOLO_DOWNFORCE, 3, State_Downforce_Percent % 10)
+}
+
+elseif (first() | dupefinished()) {
+    # ===============================
+    # ===============================
+    # Config block
+        CFG_Sound_Reverser_Neutral = "wam98_sounds/trains/miscellaneous/mpi_reveser_n.wav"
+        CFG_Sound_Reverser_Engaged = "wam98_sounds/trains/miscellaneous/mpi_reveser_fr.wav"
+        CFG_Sound_Selector_Notch = "gsgtrainsounds/misc/switch_rotating.wav"
+        CFG_Sound_Handbrake = "gsgtrainsounds/misc/switch_rotating.wav"
+    # ===============================
+    # ===============================
+
+
+
+
+    BonesSafe = 0
+    State_Downforce_Percent = 1
+
+    OFFSET_BONE_NEEDLES = -14 # degrees.
+    SCALAR_BONE_OPS = 0.0624
+    SCALAR_MPH_TO_DEG = 2.8
+
+    # We could find the bones by name, but we already know all the indices.
+    IDX_BONE_REVERSER = 1
+    IDX_BONE_SELECTOR = 2
+    IDX_BONE_THROTTLE_WHEEL = 3
+    IDX_BONE_BRAKE = 6
+    IDX_BONE_OPS = 14
+    IDX_BONE_THROTTLE_RELATIVE = 15
+    IDX_BONE_THROTTLE = 16
+    IDX_BONE_SPEED_MPH_MAX = 17
+    IDX_BONE_SPEED_MPH = 18
+    IDX_BONE_AFM = 19
+
+    IDX_SOUND_REVERSER_LEVER = 1
+    IDX_SOUND_SELECTOR_LEVER = 3
+    IDX_SOUND_HANDBRAKE = 5
+    
+    SELF = entity()
+    SELF:setBodygroup(3, 1) # Reverser lever
+    SELF:setBodygroup(4, 1) # Selector
+    SELF:setBodygroup(7, 1) # Pre-installed gauges
+    SELF:setBodygroup(8, 1) # Pre-installed gauge needles
+    SELF:setSubMaterial(8, "models/proppertextures/cabmetal_tan") # Paint color
+    SELF:setSubMaterial(18, "models/gsgtrainprops/cab/speedo_black") # Power/throttle (2nd gauge)
+    SELF:setSubMaterial(19, "models/gsgtrainprops/cab/speedo_black_freight") # Speedo (3rd gauge)
+    
+    # "rlc equipped" sticker for bootleg quality
+    holoCreate(1)
+    holoModel(1, "plane")
+    holoColor(1, vec(255))
+    holoMaterial(1, "magtrains/logos/ironwatsas/rlc-equipped-white1")
+    holoPos(1, SELF:toWorld(vec(-1.975, -2, 41.7)))
+    holoAng(1, SELF:toWorld(ang(90, 0, -90)))
+    holoParent(1, SELF)
+    holoScale(1, vec(0.07, 0.1, 0.1))
+    
+    # "power/throttle" text on throttle gauge
+    holoCreate(2)
+    holoModel(2, "plane")
+    holoColor(2, vec(255))
+    holoMaterial(2, "anytrains/labels/labels_a")
+    holoPos(2, SELF:toWorld(vec(0.2, -2.48, 42.35)))
+    holoAng(2, SELF:toWorld(ang(85, 0, -90)))
+    holoParent(2, SELF)
+    holoScale(2, vec(0.125))
+    holoClipEnabled(2, 1, 1)
+    holoClip(2, 1, vec(-0.4, 0, 0), vec(-1, 0, 0), 0)
+    
+    # Downforce holo
+    IDX_HOLO_DOWNFORCE = 3
+    holoCreate(IDX_HOLO_DOWNFORCE)
+    holoModel(IDX_HOLO_DOWNFORCE, "models/magtrainslocos/numplates/numplate_rs3_rs_3d.mdl")
+    holoPos(IDX_HOLO_DOWNFORCE, SELF:toWorld(vec(-4.13, -2.48, 42.35)))
+    holoAng(IDX_HOLO_DOWNFORCE, SELF:toWorld(ang(90, 0, -90)))
+    holoScale(IDX_HOLO_DOWNFORCE, vec(0.025))
+    holoBodygroup(IDX_HOLO_DOWNFORCE, 5, 2)
+    holoBodygroup(IDX_HOLO_DOWNFORCE, 4, 2)
+    holoParent(IDX_HOLO_DOWNFORCE, SELF)
+    
+    # If you get a bonecore error, just manually refresh the stand. Sorry.
+    timer("initbonecore", 10000)
+}
+
+elseif (clkName() == "initbonecore") {
+    interval(4000 - (Active * 3000))
+    SELF:setBoneAngRelative(IDX_BONE_AFM, ang(0, 0, -CPUUsage/2))
+    SELF:setBodygroup(14, EngineStateCode == 1 | EngineStateCode == 2)
+    SELF:setBoneAngRelative(IDX_BONE_BRAKE, ang(HandbrakeOn * 140, 0, 0))
+    soundPlay(IDX_SOUND_HANDBRAKE, 2, CFG_Sound_Handbrake)
+    SELF:setBodygroup(13, HighIdling)
+    SELF:setBoneAngRelative(IDX_BONE_THROTTLE_WHEEL, ang(Notch*-30, 0, 0))
+    SELF:setBoneAngRelative(IDX_BONE_SELECTOR, ang(Notch*-8.5, 0, 0))
+    soundPlay(IDX_SOUND_SELECTOR_LEVER, 2, CFG_Sound_Selector_Notch)
+    SELF:setBoneAngRelative(IDX_BONE_THROTTLE_RELATIVE, ang(0, 0, NotchRelativeThrottle*-2 + OFFSET_BONE_NEEDLES))
+    SELF:setBoneAngRelative(IDX_BONE_OPS, ang(0, 0, Ops * SCALAR_BONE_OPS))
+    SELF:setBoneAngRelative(IDX_BONE_REVERSER, ang(Reverser*17, 0, 0))
+    soundPlay(IDX_SOUND_REVERSER_LEVER, 2, Reverser == 0 ? CFG_Sound_Reverser_Neutral : CFG_Sound_Reverser_Engaged)
+    SELF:setBoneAngRelative(IDX_BONE_SPEED_MPH, ang(0, 0, OFFSET_BONE_NEEDLES - (min(max(0, SpeedMPH - 2), 90) * SCALAR_MPH_TO_DEG)))
+    SELF:setBoneAngRelative(IDX_BONE_SPEED_MPH_MAX, ang(0, 0, OFFSET_BONE_NEEDLES - (min(max(0, SpeedMPHMax - 2), 90) * SCALAR_MPH_TO_DEG)))
+    SELF:setBoneAngRelative(IDX_BONE_THROTTLE, ang(0, 0, Throttle*-2 + OFFSET_BONE_NEEDLES))
+    BonesSafe = 1
+}
