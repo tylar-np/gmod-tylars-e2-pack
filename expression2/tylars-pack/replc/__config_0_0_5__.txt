@@ -1,0 +1,159 @@
+@name RepLC 0.0.5 Alpha - Config explanation
+
+    # This file doesn't actually do anything on its own!
+    # It doesn't do anything in general, actually...
+    # It just exists to hold config documentation, and the default values.
+    # You should edit the "config block" of the RepLC chip instead!
+    
+    ################################################################################
+        # AGAIN, this is just documentation!
+        # Edit the config block in the actual RepLC chip!
+    ################################################################################
+    
+    
+    
+    # =======================================
+    # === Chip things =======================
+    # =======================================
+    CFG_Chip_Name = entity():getName()
+    CFG_Chip_Interval = 30 # How often it runs clk(), Undefined behavior will happen if you modify this.
+
+
+
+    # =======================================
+    # === Downforce =========================
+    # =======================================
+    # Set this to 0 to disable downforce.
+    CFG_Downforce_Enabled = 1
+    
+    # "both" | "bogies" | "driver"  - what to apply downforce on. "driver" is the wired ForceEntity.
+    CFG_Downforce_ApplyMode = "both" 
+
+    # Maximum downforce to apply - the actual force changes with speed: see _SpeedBegin and _SpeedEnd.
+    CFG_Downforce_MaxForce = 50000
+
+    # Speed at which downforce starts being applied. The amount of force will scale evenly up to _SpeedEnd.
+    # Example: if your speed is halfway between _SpeedBegin and _SpeedEnd, you'll have half the _MaxForce applied.
+    CFG_Downforce_SpeedBegin = 150
+    
+    # Speed in units/second at which point the maximum downforce will be applied.
+    CFG_Downforce_SpeedEnd = 2347 * (50/100) # 2347 == 100 mph worldscale
+
+    # Split downforce evenly between applied ents (1 - see _ApplyMode), or apply same amount of force to all (0)
+    CFG_Downforce_SplitForce = 0
+
+
+
+    # =======================================
+    # === Train Operation / Behavior ========
+    # =======================================
+    # Set to 1 to use the soundset provided by CFG_Sound_NotchSoundPath to perform startup and shutdown sounds.
+    # If set to 1, you'll need to wire a non-toggle button or a non-toggled input of some kind to Control_StartStopEngine.
+    # Set to 0 to have engine sounds and power available immediately without having to wire a start/stop switch. (This is OLC's behavior)
+    # If set to 0, the engine sound will behave like OLC and start when you enter the Active seat, stopping when you exit the seat.
+    CFG_Operation_DoEngineStartProcedures = 1
+    
+    # This one has 2 options!
+    # Set to 0 and the chip's engine sound will behave like OLC, where it just pitches an engine loop for the sound.
+    #     Relevant options for 0:
+    #         CFG_Sound_EnginePosition   - position of the engine sound origin in relation to the E2.
+    #         CFG_Sound_EngineLoop       - sound loop to use.
+    # Set to 1 and the chip will use a PT2 soundset to fake notching up and down, based on the throttle setting.
+    #     Relevant options for 1:
+    #         CFG_Sound_EnginePosition   - position of the engine sound origin in relation to the E2.
+    #         CFG_Sound_NotchSoundPath   - base directory (folder) holding the PT2 soundset.
+    #         CFG_Sound_NotchThresholds  - at which throttle setting each notch sound should start playing.
+    #     If set to 1, the throttle's range will be 0 to 100 instead of -100 to 100, and you'll need to wire non-toggle inputs
+    #     to Control_Reverser_Forward and Control_Reverser_Back to control the direction of the train (A and D are good)
+    CFG_Operation_DoFakeNotchSounds = 1
+    
+    # "entity" | "weld"  - what the E2 should apply force to in order to move the train.
+    # "entity" is the wired ForceEntity - "weld" is whatever the E2 is welded to.
+    # If "entity" is selected here and ForceEntity is wired up, you can parent the E2.
+    CFG_Operation_Forcemode = "entity"
+    
+    # When applying force to move the train, the force applied will be multiplied by this value.
+    CFG_Operation_ForceMultiplier = 1.0
+    
+    # At 100% throttle, this is the max speed the train will try to force itself to go.
+    # This isn't really a hard limit - the chip will just stop applying force to move the train at this speed.
+    # It scales linearly with the throttle setting. So, at 50% throttle, max speed will be half this number.
+    CFG_Operation_MaxSpeed = 2347 * (65/100) # 2347 units == 100 mph worldscale.
+    
+     # Physical properties to apply to the train's bogies for various brake states.
+    CFG_Operation_PhysProp_Handbrake = "metal"
+    CFG_Operation_PhysProp_NoBrakes = "gmod_ice" # "gmod_ice" is normally called Super Ice
+
+    # If _DoEngineStartProcedures is 1, how long should the engine linger in high idle after startup?
+    # These are in seconds. A number will be picked randomly between the two.
+    CFG_Operation_PostStartHighIdleTime_Low = 70
+    CFG_Operation_PostStartHighIdleTime_High = 110
+    
+    # Creates a "dead zone" for the throttle control. A throttle state this far over or under from 0 will just be treated as 0
+    # so that you can easily center the throttle on idle.
+    CFG_Operation_ThrottleDeadzoneSize = 4
+
+    # Normal and Slow throttle speed. This is the speed at which the throttle is adjusted. _ThrottleSpeedSlow is used
+    # when the input for Toggle_ThrottleSlow is active.
+    # Preferably, make these multiples or fractions of 2.
+    CFG_Operation_ThrottleSpeedNormal = 0.5
+    CFG_Operation_ThrottleSpeedSlow = 0.125
+    
+    # Should the chip output the speed in world or player scale?
+    # Values are "world" and "player"
+    CFG_Operation_UnitScale = "world"
+
+
+
+    # =======================================
+    # === Sounds ============================
+    # =======================================
+    # Also see CFG_Operation_DoFakeNotchSounds (above)!
+    
+    # If _DoFakeNotchSounds is 1, you can tell the E2 to play a second sound with its own DSP that sounds like
+    # it's coming from far away.
+    # Inspired by Toastur's edits to PT2 that accomplish pretty much the same thing.
+    CFG_Sound_EnableEngineDSP = 1
+    CFG_Sound_DistantDSP = 15
+    CFG_Sound_DistantLevel = 100
+    
+    # Position where the engine sound should originate, relative to the E2.
+    # Positive Z is where the arrow points.
+    CFG_Sound_Engine_Position = vec(0, 0, -180)
+    
+    # If you want to soundLevel the engine sound to something other than 80:
+    CFG_Sound_EngineLevel = 85
+
+    # If _DoFakeNotchSounds is 0, this is the sound that will play for the OLC-style engine loop.
+    CFG_Sound_EngineLoop = "wam98_sounds/trains/engines/emd645e3v20/notch2.wav"
+    
+    # Sounds for handbrake (cough cough "parking brake") application.
+    CFG_Sound_Handbrake_Off = "gsgtrainsounds/misc/air_off.wav"
+    CFG_Sound_Handbrake_On = "gsgtrainsounds/misc/air_on.wav"
+    
+    # If _DoFakeNotchSounds is 1, the _NotchSoundPath is the folder where the PT2 soundset you want to use is.
+    CFG_Sound_NotchSoundPath = "wam98_sounds/trains/engines/emd645e3cv16"
+
+    # If _DoFakeNotchSounds is 1, these are the throttle settings (percent/out of 100) at which each "notch" starts.
+    # These represent points at which a new notch will begin if the're crossed over by the throttle.
+    # For example, changing the throttle from 14% to 16% will transition the sound from Notch 1 to Notch 2, because 2's
+    # low end is at 15% throttle. Any throttle setting from 15% to just under 30% is Notch 2 in this example, because
+    # Notch 3 starts at 30%.
+    CFG_Sound_NotchThresholds = array(
+        1,  # Notch 1: this throttle setting at the low end. Keep this at 1!!! 0 and only 0 is considered "idle"
+        15, # Notch 2: this throttle setting at the low end
+        30, # ...
+        40,
+        55,
+        70,
+        85,
+        95  # Notch 8: this throttle setting at the low end
+    )
+    
+    
+    
+    # =======================================
+    # === Holoing ===========================
+    # =======================================
+    # Holo the bogies on? (Useful if you're proper clipping them)
+    CFG_Holo_Bogies = 1
