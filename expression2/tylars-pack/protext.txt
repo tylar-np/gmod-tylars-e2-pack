@@ -1,4 +1,4 @@
-@name Tylar's ProText 1.0.0
+@name Tylar's ProText 1.0.1
 @inputs [Parent]:entity
 @persist [CONFIG FontRegistry]:table
 @persist [ENT]:entity
@@ -292,9 +292,9 @@ function void loadFontFromFile(FontName:string) {
 
 # User gives options for each line in a table, we however want to just run one table access for each key to save on CPU.
 function void copyLineOptionsToState(Options:table) {
-    State_BaseCharWidth = Options["size", number] || 12
+    State_BaseCharWidth = max(0, min(Options["size", number], 512))
     State_CharPadding = Options["char_padding", number]
-    State_CharScale = (State_BaseCharWidth) / 12
+    State_CharScale = State_BaseCharWidth / 12
     State_Color = Options["color", vector]
     State_LetterAngle = Options["angle_letter", angle]
     State_LineAngle = Options["angle", angle]
