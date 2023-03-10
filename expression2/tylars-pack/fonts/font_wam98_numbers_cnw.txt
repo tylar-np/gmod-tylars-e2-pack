@@ -1,0 +1,10 @@
+    # WAM's and Kei's Train Pack - Numbers (Comenow/CNW)
+    FontRegistry["wam98_numbers_cnw", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath_numeric" = "wam98_textures/cnw/comenow/",
+        "getpath" = array(VWAMNumbers),
+        "kerning_margin_x" = table(
+            "1" = -0.05
+        )
+    )
+    

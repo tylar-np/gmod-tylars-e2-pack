@@ -1,0 +1,19 @@
+    # Monk(atraz)'s Train Models Pack - Southern Pacific numbers (old)
+    FontRegistry["monk_numbers_spold", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "models/monkcabdetailpack/numbers/spold/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "0" = 0.02,
+            "1" = -0.03,
+            "2" = 0.02,
+            "3" = 0.02,
+            "4" = 0.02,
+            "5" = 0.02,
+            "6" = 0.02,
+            "7" = 0.02,
+            "8" = 0.04,
+            "9" = 0.02
+        )
+    )
+    

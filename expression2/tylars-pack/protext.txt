@@ -1,0 +1,819 @@
+@name Tylar's ProText 1.0.0
+@inputs [Parent]:entity
+@persist [CONFIG FontRegistry]:table
+@persist [ENT]:entity
+@persist [Cur_Char Cur_Holo Cur_Inspect_Char Cur_Offset Cur_Text TRUE FALSE ON OFF]:number
+@persist [Swap TEXT_ALIGN_LEFT TEXT_ALIGN_CENTER TEXT_ALIGN_RIGHT]:string
+@persist [GuideOffset]:vector
+@persist [TIdentity TLower TUpper]:string
+@persist [VAlpha VAlphaHC VAlphaLC VCommonGoudySymbols VCommonSpartanSymbols VCubicSouthernW2 VCubic3456789]:string
+@persist [VCubicSymbol VDashLiteral VGroveICG VGroveSMQ VJintyNumberSymbol VMeem7segSpace VNumeric VPowertrainNW]:string
+@persist [VSymbol VWAMNumbers VZexcivNeutraSlant5]:string
+@persist [State_LetterAngle State_LineAngle]:angle
+@persist [State_Current_Materials State_Current_Tops State_Current_Widths]:array
+@persist [State_FontGetPaths State_FontPreTransforms]:array
+@persist [State_BaseCharWidth State_CharPadding State_CharScale]:number
+@persist [State_FontNumPreTransforms State_FontNumGetPaths State_UseFontFiles]:number
+@persist [State_Raise State_ShouldKern State_SpaceCharScale]:number
+@persist [State_FontName State_Text]:string
+@persist [State_FontInfo State_FontKerningMarginTop State_FontKerningMarginX]:table
+@persist [State_Color State_Position]:vector
+@trigger none
+
+
+#[
+    ATTENTION BUILDERS who intend to distribute this E2 as part of a build:
+    
+    You can! But you may want to pack the font definitions into the file before doing so,
+    because if you don't, it will try to load fonts from the disks of users who may not have
+    the font files installed, resulting in a script error for those users.
+    
+    The E2 provides an easy way for you to pack in the fonts for portability:
+    1. Copy the font file's entire contents and paste it into the "precacheFonts()" function.
+        - You can do this for multiple fonts.
+        - Only do it for the fonts you need.
+    2. Delete the /entire/ "loadFontFromFile()" function.
+        - I promise you that the E2 will work fine without the function if you've done step 1.
+    That's it!
+]#
+
+
+
+
+# =======================================================================
+# HOW TO CONFIGURE
+# The "config()" function here should return a table.
+#   The table that is returned should contain multiple tables.
+#   Each of these 'inside' tables represent 1 line of text.
+#   After each table, except the last one, you should place a comma (,).
+# =======================================================================
+# DEFAULT VALUES
+# The default configuration for a line looks like this:
+#[
+
+        table(
+            "text" = "Hello World",
+            "font" = "trainbuild_spartan",  # Font names are located in tylars-pack/fonts/font_[[NAME]].txt
+            "align" = TEXT_ALIGN_CENTER,    # One of: TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, TEXT_ALIGN_RIGHT
+            "size" = 12,
+            "color" = vec(0),
+            "position" = vec(0),            # Position of the line in relation to the "Parent" input entity (or chip if Parent is unwired).
+            "angle" = ang(0),               # Angle of the line in relation to the "Parent" input entity (or chip if Parent is unwired).
+            "angle_letter" = ang(0),        # Angle to rotate each character in the line by, individually.
+            "kerning" = ON,                 # ON or OFF (ON enables "readable" spacing between characters.)
+            "char_padding" = -0.25,         # "Spacing" between characters. (Percentage (out of 1) of character width)
+            "space_char_scale" = 0.8,       # How wide the space character is, as a proportion of the "size" and offset by "char_padding"
+            "raise" = 0.5                   # Additional offset to "raise" each character off the surface by. (Units)
+        ) # Remember to put a comma here at the end of this table, if another line of text follows it!
+
+]#
+# =======================================================================
+# MODIFY THE CONFIG HERE
+# =======================================================================
+function table config() {
+    local TextsToWrite = table(
+
+
+
+
+
+        # Line 1
+        table(
+            "text" = "Hello World 123",
+            "font" = "trainbuild_spartan",
+            "size" = 12
+        ),
+
+        # Line 2
+        table(
+            "text" = "BIG Hello World 456...",
+            "font" = "trainbuild_spartan",
+            "size" = 24,
+            "position" = vec(30, 0, 0)
+        ),
+
+        # Line 3
+        table(
+            "text" = "This line is ROTATED.",
+            "font" = "trainbuild_spartan",
+            "size" = 18,
+            "position" = vec(60, 0, 0),
+            "angle" = ang(0, 5, 0),
+            "color" = vec(255, 255, 0)
+        )
+
+        # Add as many or as little lines as you want. Adding 0 lines will display the axis guide so you can reference it.
+    
+    
+    
+    
+    )
+    
+    return TextsToWrite
+}
+
+
+
+function void precacheFonts() {
+    
+    # If you're distributing the E2 as part of a dupe or build,
+    # or if you just want to edit the font you're using,
+    # paste the contents of the font files you want to use in here.
+    # Instead of trying to #include font files users with your dupe might
+    # not have, the chip will just call this function and load the
+    # fonts here instead.
+    # If you don't plan to give the build out, you can skip this optional step!
+    # fonts will load from tylars-pack/fonts/font_*.txt normally.
+    #
+    # If you paste fonts in here,
+    # remember to delete (or comment out) the entire "loadFontFromFile" function after doing so.
+    
+    # Example:
+    
+    #[
+    
+    # Cubic's Materials Pack - wm1 numbers
+    FontRegistry["cubic_numbers_wm1", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "cubics_pack/numbers/wm1/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "0" = 0.04,
+            "1" = -0.03,
+            "2" = 0.04,
+            "3" = 0.04,
+            "4" = 0.04,
+            "5" = 0.04,
+            "6" = 0.04,
+            "7" = 0.04,
+            "8" = 0.04,
+            "9" = 0.04
+        )
+    )
+    
+    ]#
+    
+}
+
+
+# DELETE this "loadFontFromFile()" function IF and ONLY IF you load the fonts in precacheFonts()!
+function void loadFontFromFile(FontName:string) {
+    switch (FontName) {
+        case "cubic_clarendon",                     #include "tylars-pack/fonts/font_cubic_clarendon", break
+        case "cubic_numbers_42-49",                 #include "tylars-pack/fonts/font_cubic_numbers_42-49", break
+        case "cubic_numbers_49-67",                 #include "tylars-pack/fonts/font_cubic_numbers_49-67", break
+        case "cubic_numbers_67-",                   #include "tylars-pack/fonts/font_cubic_numbers_67-", break
+        case "cubic_numbers_arial",                 #include "tylars-pack/fonts/font_cubic_numbers_arial", break
+        case "cubic_numbers_boston_traffic",        #include "tylars-pack/fonts/font_cubic_numbers_boston_traffic", break
+        case "cubic_numbers_bou_western",           #include "tylars-pack/fonts/font_cubic_numbers_bou_western", break
+        case "cubic_numbers_bpg_num",               #include "tylars-pack/fonts/font_cubic_numbers_bpg_num", break
+        case "cubic_numbers_br_numbers_light",      #include "tylars-pack/fonts/font_cubic_numbers_br_numbers_light", break
+        case "cubic_numbers_carknocker",            #include "tylars-pack/fonts/font_cubic_numbers_carknocker", break
+        case "cubic_numbers_ches",                  #include "tylars-pack/fonts/font_cubic_numbers_ches", break
+        case "cubic_numbers_clarendon",             #include "tylars-pack/fonts/font_cubic_numbers_clarendon", break
+        case "cubic_numbers_cnw",                   #include "tylars-pack/fonts/font_cubic_numbers_cnw", break
+        case "cubic_numbers_cp",                    #include "tylars-pack/fonts/font_cubic_numbers_cp", break
+        case "cubic_numbers_cr1",                   #include "tylars-pack/fonts/font_cubic_numbers_cr1", break
+        case "cubic_numbers_cr2",                   #include "tylars-pack/fonts/font_cubic_numbers_cr2", break
+        case "cubic_numbers_cr3",                   #include "tylars-pack/fonts/font_cubic_numbers_cr3", break
+        case "cubic_numbers_cts",                   #include "tylars-pack/fonts/font_cubic_numbers_cts", break
+        case "cubic_numbers_cutecuddly",            #include "tylars-pack/fonts/font_cubic_numbers_cutecuddly", break
+        case "cubic_numbers_dt&i",                  #include "tylars-pack/fonts/font_cubic_numbers_dt&i", break
+        case "cubic_numbers_empire_builder",        #include "tylars-pack/fonts/font_cubic_numbers_empire_builder", break
+        case "cubic_numbers_erie_roman",            #include "tylars-pack/fonts/font_cubic_numbers_erie_roman", break
+        case "cubic_numbers_franklin_gothic",       #include "tylars-pack/fonts/font_cubic_numbers_franklin_gothic", break
+        case "cubic_numbers_freight",               #include "tylars-pack/fonts/font_cubic_numbers_freight", break
+        case "cubic_numbers_frisco",                #include "tylars-pack/fonts/font_cubic_numbers_frisco", break
+        case "cubic_numbers_gmcx",                  #include "tylars-pack/fonts/font_cubic_numbers_gmcx", break
+        case "cubic_numbers_gopher",                #include "tylars-pack/fonts/font_cubic_numbers_gopher", break
+        case "cubic_numbers_helvetica",             #include "tylars-pack/fonts/font_cubic_numbers_helvetica", break
+        case "cubic_numbers_helvetica2",            #include "tylars-pack/fonts/font_cubic_numbers_helvetica2", break
+        case "cubic_numbers_helvetica_border",      #include "tylars-pack/fonts/font_cubic_numbers_helvetica_border", break
+        case "cubic_numbers_helvetica_condensed",   #include "tylars-pack/fonts/font_cubic_numbers_helvetica_condensed", break
+        case "cubic_numbers_ice",                   #include "tylars-pack/fonts/font_cubic_numbers_ice", break
+        case "cubic_numbers_icg",                   #include "tylars-pack/fonts/font_cubic_numbers_icg", break
+        case "cubic_numbers_interextra_bold",       #include "tylars-pack/fonts/font_cubic_numbers_interextra_bold", break
+        case "cubic_numbers_ln",                    #include "tylars-pack/fonts/font_cubic_numbers_ln", break
+        case "cubic_numbers_mittelschrift",         #include "tylars-pack/fonts/font_cubic_numbers_mittelschrift", break
+        case "cubic_numbers_mnrr",                  #include "tylars-pack/fonts/font_cubic_numbers_mnrr", break
+        case "cubic_numbers_navy",                  #include "tylars-pack/fonts/font_cubic_numbers_navy", break
+        case "cubic_numbers_neutra",                #include "tylars-pack/fonts/font_cubic_numbers_neutra", break
+        case "cubic_numbers_pn",                    #include "tylars-pack/fonts/font_cubic_numbers_pn", break
+        case "cubic_numbers_prr",                   #include "tylars-pack/fonts/font_cubic_numbers_prr", break
+        case "cubic_numbers_prr_old",               #include "tylars-pack/fonts/font_cubic_numbers_prr_old", break
+        case "cubic_numbers_pt_root",               #include "tylars-pack/fonts/font_cubic_numbers_pt_root", break
+        case "cubic_numbers_railroad_roman",        #include "tylars-pack/fonts/font_cubic_numbers_railroad_roman", break
+        case "cubic_numbers_rfp",                   #include "tylars-pack/fonts/font_cubic_numbers_rfp", break
+        case "cubic_numbers_rock_island",           #include "tylars-pack/fonts/font_cubic_numbers_rock_island", break
+        case "cubic_numbers_scl",                   #include "tylars-pack/fonts/font_cubic_numbers_scl", break
+        case "cubic_numbers_sharpie",               #include "tylars-pack/fonts/font_cubic_numbers_sharpie", break
+        case "cubic_numbers_soo",                   #include "tylars-pack/fonts/font_cubic_numbers_soo", break
+        case "cubic_numbers_sou",                   #include "tylars-pack/fonts/font_cubic_numbers_sou", break
+        case "cubic_numbers_sou_freight",           #include "tylars-pack/fonts/font_cubic_numbers_sou_freight", break
+        case "cubic_numbers_sp_roman",              #include "tylars-pack/fonts/font_cubic_numbers_sp_roman", break
+        case "cubic_numbers_sp_roman_stencil",      #include "tylars-pack/fonts/font_cubic_numbers_sp_roman_stencil", break
+        case "cubic_numbers_up",                    #include "tylars-pack/fonts/font_cubic_numbers_up", break
+        case "cubic_numbers_up_no_border",          #include "tylars-pack/fonts/font_cubic_numbers_up_no_border", break
+        case "cubic_numbers_up_thin_border",        #include "tylars-pack/fonts/font_cubic_numbers_up_thin_border", break
+        case "cubic_numbers_wab_roman",             #include "tylars-pack/fonts/font_cubic_numbers_wab_roman", break
+        case "cubic_numbers_winner_extended",       #include "tylars-pack/fonts/font_cubic_numbers_winner_extended", break
+        case "cubic_numbers_wm1",                   #include "tylars-pack/fonts/font_cubic_numbers_wm1", break
+        case "cubic_southern",                      #include "tylars-pack/fonts/font_cubic_southern", break
+        case "cubic_southern_altw",                 #include "tylars-pack/fonts/font_cubic_southern_altw", break
+        case "cubic_up",                            #include "tylars-pack/fonts/font_cubic_up", break
+        case "cubic_up_bordered",                   #include "tylars-pack/fonts/font_cubic_up_bordered", break
+        case "cubic_up_bordered_thin",              #include "tylars-pack/fonts/font_cubic_up_bordered_thin", break
+        case "cubic_winner",                        #include "tylars-pack/fonts/font_cubic_winner", break
+        case "foxfuuka_numbers_carbono",            #include "tylars-pack/fonts/font_foxfuuka_numbers_carbono", break
+        case "foxfuuka_numbers_ns",                 #include "tylars-pack/fonts/font_foxfuuka_numbers_ns", break
+        case "goomz_clarendon",                     #include "tylars-pack/fonts/font_goomz_clarendon", break
+        case "grove_numbers_arial_bold",            #include "tylars-pack/fonts/font_grove_numbers_arial_bold", break
+        case "grove_numbers_futura",                #include "tylars-pack/fonts/font_grove_numbers_futura", break
+        case "grove_numbers_futura_bold",           #include "tylars-pack/fonts/font_grove_numbers_futura_bold", break
+        case "grove_numbers_ca",                    #include "tylars-pack/fonts/font_grove_numbers_ca", break
+        case "grove_numbers_icg",                   #include "tylars-pack/fonts/font_grove_numbers_icg", break
+        case "grove_numbers_na",                    #include "tylars-pack/fonts/font_grove_numbers_na", break
+        case "grove_numbers_na_old",                #include "tylars-pack/fonts/font_grove_numbers_na_old", break
+        case "grove_numbers_smq",                   #include "tylars-pack/fonts/font_grove_numbers_smq", break
+        case "grove_sylfaen",                       #include "tylars-pack/fonts/font_grove_sylfaen", break
+        case "jinty_eandp4_cab",                    #include "tylars-pack/fonts/font_jinty_eandp4_cab", break
+        case "jinty_eandp4_tender",                 #include "tylars-pack/fonts/font_jinty_eandp4_tender", break
+        case "jinty_chalk",                         #include "tylars-pack/fonts/font_jinty_chalk", break
+        case "jinty_dancing_script",                #include "tylars-pack/fonts/font_jinty_dancing_script", break
+        case "jinty_gill_sans",                     #include "tylars-pack/fonts/font_jinty_gill_sans", break
+        case "jinty_gill_sans_outline",             #include "tylars-pack/fonts/font_jinty_gill_sans_outline", break
+        case "jinty_lemonmilk",                     #include "tylars-pack/fonts/font_jinty_lemonmilk", break
+        case "jinty_numbers_aero",                  #include "tylars-pack/fonts/font_jinty_numbers_aero", break
+        case "jinty_numbers_bevan",                 #include "tylars-pack/fonts/font_jinty_numbers_bevan", break
+        case "jinty_numbers_flangebq",              #include "tylars-pack/fonts/font_jinty_numbers_flangebq", break
+        case "jinty_old_street_sign",               #include "tylars-pack/fonts/font_jinty_old_street_sign", break
+        case "jinty_old_street_sign_outlined",      #include "tylars-pack/fonts/font_jinty_old_street_sign_outlined", break
+        case "meem_underground",                    #include "tylars-pack/fonts/font_meem_underground", break
+        case "meem_7seg_timebomb",                  #include "tylars-pack/fonts/font_meem_7seg_timebomb", break
+        case "monk_numbers_eag",                    #include "tylars-pack/fonts/font_monk_numbers_eag", break
+        case "monk_numbers_rr1",                    #include "tylars-pack/fonts/font_monk_numbers_rr1", break
+        case "monk_numbers_rr2",                    #include "tylars-pack/fonts/font_monk_numbers_rr2", break
+        case "monk_numbers_rr5",                    #include "tylars-pack/fonts/font_monk_numbers_rr5", break
+        case "monk_numbers_spold",                  #include "tylars-pack/fonts/font_monk_numbers_spold", break
+        case "pain_numbers_jerseyinterstate",       #include "tylars-pack/fonts/font_pain_numbers_jerseyinterstate", break
+        case "powertrain_nw",                       #include "tylars-pack/fonts/font_powertrain_nw", break
+        case "trainbuild_goudy",                    #include "tylars-pack/fonts/font_trainbuild_goudy", break
+        case "trainbuild_numbers_bahnschrift",      #include "tylars-pack/fonts/font_trainbuild_numbers_bahnschrift", break
+        case "trainbuild_numbers_chalk",            #include "tylars-pack/fonts/font_trainbuild_numbers_chalk", break
+        case "trainbuild_numbers_ebrima",           #include "tylars-pack/fonts/font_trainbuild_numbers_ebrima", break
+        case "trainbuild_numbers_ebrima",           #include "tylars-pack/fonts/font_trainbuild_numbers_ebrima", break
+        case "trainbuild_spartan",                  #include "tylars-pack/fonts/font_trainbuild_spartan", break
+        case "wam98_numbers_br",                    #include "tylars-pack/fonts/font_wam98_numbers_br", break
+        case "wam98_numbers_cnw",                   #include "tylars-pack/fonts/font_wam98_numbers_cnw", break
+        case "wam98_numbers_cs",                    #include "tylars-pack/fonts/font_wam98_numbers_cs", break
+        case "wam98_numbers_frutiger",              #include "tylars-pack/fonts/font_wam98_numbers_frutiger", break
+        case "wam98_numbers_timesnewroman",         #include "tylars-pack/fonts/font_wam98_numbers_timesnewroman", break
+        case "zexciv_bahnschrift",                  #include "tylars-pack/fonts/font_zexciv_bahnschrift", break
+        case "zexciv_numbers_neutra",               #include "tylars-pack/fonts/font_zexciv_numbers_neutra", break
+        case "zexciv_numbers_neutra_slant5",        #include "tylars-pack/fonts/font_zexciv_numbers_neutra_slant5", break
+    }
+} # END of the "loadFontFromFile()" function
+
+
+
+
+
+# ===================================================================================================
+# ===================================================================================================
+# Under no circumstances should you edit below this,
+# unless you absolutely need to modify the E2's internal code without going through a config option.
+# Editing below voids warranty and I can't offer support to you if you do.
+# ===================================================================================================
+# ===================================================================================================
+
+
+
+
+
+# User gives options for each line in a table, we however want to just run one table access for each key to save on CPU.
+function void copyLineOptionsToState(Options:table) {
+    State_BaseCharWidth = Options["size", number] || 12
+    State_CharPadding = Options["char_padding", number]
+    State_CharScale = (State_BaseCharWidth) / 12
+    State_Color = Options["color", vector]
+    State_LetterAngle = Options["angle_letter", angle]
+    State_LineAngle = Options["angle", angle]
+    State_Position = Options["position", vector]
+    State_Raise = Options["raise", number]
+    State_ShouldKern = Options["kerning", number] > 0
+    State_SpaceCharScale = Options["space_char_scale", number]
+    State_Text = Options["text", string]
+
+    State_Current_Widths:clear()
+    State_Current_Tops:clear()
+    State_Current_Materials:clear()
+}
+
+function void copyFontOptionsToState() {
+    State_FontInfo = FontRegistry[State_FontName, table]
+    State_FontPreTransforms = State_FontInfo["pretransformchar", array]
+    State_FontNumPreTransforms = State_FontPreTransforms:count()
+    State_FontGetPaths = State_FontInfo["getpath", array]
+    State_FontNumGetPaths = State_FontGetPaths:count()
+    State_FontKerningMarginTop = State_FontInfo["kerning_margin_top", table]
+    State_FontKerningMarginX = State_FontInfo["kerning_margin_x", table]
+}
+
+
+
+# Timer is equally as "likely" to run as classifyChars.
+# Takes info about the line, character by character, and creates the character holo based on the calculated sizes and
+# positions, etc. for each char.
+# If the Cur_Char is 0 (start of the line), the "classifyChars" timer chain will trigger for the line info to build.
+if (clkName() == "createCharHolo") {
+    if (Cur_Text > CONFIG:count()) {
+        timer("cleanupGuideHolos", 1500)
+        exit()
+    }
+    
+    local Options = CONFIG[Cur_Text, table]
+    
+    # If we're just starting this line we need to store info about the line, like what chars/materials we need,
+    # the width of the line, starting offset with selected alignment, etc.
+    if (Cur_Char == 0) {
+        if (!Options) {
+            exit()
+        }
+        
+        if (Options["text", string]:length() == 0) {
+            Cur_Text++
+            timer("createCharHolo", 125)
+            exit()
+        }
+        
+        # Cache this line's info.
+        State_FontName = Options["font", string]
+        if (!FontRegistry:exists(State_FontName)) {
+            if (State_UseFontFiles) {
+                Func_loadFontFromFile = "loadFontFromFile"
+                Func_loadFontFromFile(State_FontName)
+            }
+        }
+        
+        if (!FontRegistry:exists(State_FontName)) {
+            error(format("Error: Could not find/load font '%s'", State_FontName))
+            exit()
+        }
+        
+        copyLineOptionsToState(Options)
+        copyFontOptionsToState()
+        
+        # Classify/analyze the entire line.
+        # First turn the "position" holo into a progress spinner (displays as an asterisk)
+        holoModel(1, "models/sprops/misc/alphanum/alphanum_ast.mdl")
+        holoAlpha(1, 255)
+        holoColor(1, vec(255, 255, 0))
+        holoScale(1, vec(1.5, 0.1, 1.5))
+        timer("classifyChars", 50)
+        exit()
+    }
+    
+    if (Cur_Char > State_Text:length()) {
+        Cur_Text++
+        Cur_Char = 0
+        timer("createCharHolo", 125)
+        exit()
+    }
+
+    local CharWidth = State_Current_Widths[Cur_Char, number]
+    if (Cur_Char != 1) {
+        Cur_Offset += CharWidth + (State_BaseCharWidth * State_CharPadding)
+    } else {
+        # Turn the "position" holo into a cursor (capital I-shape)
+        holoModel(1, "models/sprops/misc/alphanum/alphanum_i.mdl")
+        holoColor(1, vec(155, 255, 0))
+        holoScale(1, vec(State_CharScale * 1.3, 0.1, State_CharScale * 1.4))
+        holoAlpha(1, 255)
+    }
+    
+    local Material = State_Current_Materials[Cur_Char, string]
+    if (Material != "") {
+        # Action: Create holo for this 2d letter.
+        local CharTopOffset = Material == "" ? 0 : State_Current_Tops[Cur_Char, number]
+        local HoloPos = ENT:toWorld(State_Position + (-State_LineAngle:right() * Cur_Offset) + (State_LineAngle:forward() * CharTopOffset) + (State_LineAngle:up() * State_Raise))
+        holoCreate(Cur_Holo)
+        holoModel(Cur_Holo, "plane")
+        holoColor(Cur_Holo, State_Color)
+        holoMaterial(Cur_Holo, Material)
+        holoPos(Cur_Holo, HoloPos)
+        holoAng(Cur_Holo, ENT:toWorld(State_LineAngle + State_LetterAngle))
+        holoParent(Cur_Holo, ENT)
+        holoScale(Cur_Holo, vec(State_CharScale))
+        
+        # Feedback: Move the guide holo and play a sound that sounds like a scribbling pencil.
+        holoPos(1, holoEntity(Cur_Holo):toWorld(GuideOffset))
+        holoAng(1, holoEntity(Cur_Holo):toWorld(ang(0, 90, -90)))
+        holoEntity(Cur_Holo):soundPlay(0, 0.8, "vfx/sparks_quick/sparks_quick_high_intensity/sparks_quick_high_intensity_10.wav")
+        soundVolume(0, 0)
+        soundVolume(0, 1, 0.3)
+        soundPitch(0, 195 + randint(60))
+        
+        Cur_Holo++
+    }
+    
+    Cur_Offset += CharWidth - State_BaseCharWidth
+    Cur_Char++
+    
+    timer("createCharHolo", 125)
+}
+
+
+
+# Timer is equally as "likely" to run as createCharHolo.
+# On each timer clk, it'll look at each character in the table and get info about its material, size and offset.
+# At the end of the current line, it'll sum the total width of the line and set a starting offset based on alignment.
+# At the end, Cur_Char should be 1; It then invokes createCharHolo to write the text out.
+elseif (clkName() == "classifyChars") {
+    Cur_Inspect_Char++
+    local Options = CONFIG[Cur_Text, table]
+    
+    if (Cur_Inspect_Char > State_Text:length()) {
+        Cur_Inspect_Char = 0
+
+        local LineWidth = 0
+        for (I=1, State_Current_Widths:count()) {
+            local State_CharWidth = State_Current_Widths[I, number]
+            LineWidth = LineWidth + (2 * State_CharWidth) - State_BaseCharWidth + (State_BaseCharWidth * (State_CharPadding))
+            # Starting placement will be overcompensated, so adjust backward.
+            if (I == 1) {
+                LineWidth = LineWidth - State_CharWidth - (State_BaseCharWidth * State_CharPadding)
+            }
+        }
+
+        Cur_Offset = 0
+        switch(Options["align", string]) {
+            case "center",
+                Cur_Offset = -LineWidth/2
+                break
+            case "right",
+                Cur_Offset = -LineWidth
+                break
+        }
+        
+        Cur_Char = 1
+        timer("createCharHolo", 200)
+        exit()
+        
+    }
+    
+    # Transform character before finding its material.
+    local Char = State_Text[Cur_Inspect_Char]
+    Swap = Char
+    if (State_FontNumPreTransforms > 0) {
+        for (I=1, State_FontNumPreTransforms) {
+            # This will have pushed the transformation into the Swap variable
+            # (limitation of callable strings)
+            State_FontPreTransforms[I, string](State_FontInfo, Char)
+        }
+        Char = Swap
+    }
+    
+    # Assess material pathing
+    Swap = ""
+    if (State_FontNumGetPaths > 0) {
+        for (I=1, State_FontNumGetPaths) {
+            State_FontGetPaths[I, string](State_FontInfo, Char)
+        }
+    }
+    Char = Swap == "" ? " " : Char
+    local CharMatPath = Swap
+    
+    # Get width of this character, factor in margin.
+    local CharMarginX = State_ShouldKern * State_FontKerningMarginX[Char, number]
+    local CharWidth = Char == " " & Swap == "" ? State_BaseCharWidth * State_SpaceCharScale : State_BaseCharWidth + 2*(State_BaseCharWidth * CharMarginX)
+    # Same thing for top (handled as an offset, will move but won't shrink height like MarginX does width).
+    local CharMarginTop = State_ShouldKern * State_FontKerningMarginTop[Char, number]
+    local CharYOffset = State_BaseCharWidth * CharMarginTop
+    
+    # Push character material and info table.
+    State_Current_Materials:pushString(CharMatPath)
+    State_Current_Widths:pushNumber(CharWidth)
+    State_Current_Tops:pushNumber(CharYOffset)
+    
+    local SpinnerAng = holoEntity(1):angles()
+    holoAng(1, SpinnerAng:rotateAroundAxis(SpinnerAng:right(), -30))
+    timer("classifyChars", 30 + State_FontNumPreTransforms * 5) # Accounts for extra "cost" of multiple functions
+    exit()
+}
+
+
+
+elseif (first() | dupefinished()) {
+    TRUE = 1
+    FALSE = 0
+    ON = TRUE
+    OFF = FALSE
+    TEXT_ALIGN_LEFT = "left"
+    TEXT_ALIGN_CENTER = "center"
+    TEXT_ALIGN_RIGHT = "right"
+    
+    # Character validation/transformation funcs
+    # Kinda like currying, they just run in a row and touch the value in Swap
+    # Combined in chained calls via the font registry
+    function void vAlpha(Options:table, Char:string) {
+        local B = toByte(Char)
+        if (B >= 0x61 && B <= 0x7A) {
+            Swap = Options["basepath", string] + Char
+        }
+    } VAlpha = "vAlpha"
+    
+    function void vAlphaHC(Options:table, Char:string) {
+        local B = toByte(Char)
+        if (B >= 0x41 && B <= 0x5A) {
+            Swap = Options["basepath", string] + "hc_" + Char:lower()
+        }
+    } VAlphaHC = "vAlphaHC"
+    
+    function void vAlphaLC(Options:table, Char:string) {
+        local B = toByte(Char)
+        if (B >= 0x61 && B <= 0x7A) {
+            Swap = Options["basepath", string] + "lc_" + Char
+        }
+    } VAlphaLC = "vAlphaLC"
+    
+    function void vNumeric(Options:table, Char:string) {
+        local P = Options["basepath_numeric", string]
+        if (P == "") {
+            P = Options["basepath", string]
+        }
+        local B = toByte(Char)
+        if (B >= 0x30 && B <= 0x39) {
+            Swap = P + Char
+        }
+    } VNumeric = "vNumeric"
+    
+    function void vCubic3456789(Options:table, Char:string) {
+        local B = toByte(Char)
+        if (B >= 0x33 && B <= 0x39) {
+            Swap = Options["basepath", string] + Char
+        }
+    } VCubic3456789 = "vCubic3456789"
+    
+    # Cubic's fonts. TODO: Do we make . smaller in up_outlined?
+    function void vCubicSymbol(Options:table, Char:string) {
+        local B = toByte(Char)
+        if (Char == "&") {
+            Swap = Options["basepath", string] + "&"
+        } elseif (Char == ".") {
+            Swap = Options["basepath", string] + "period"
+        }
+    } VCubicSymbol = "vCubicSymbol"
+    
+    function void vCubicSouthernW2(Options:table, Char:string) {
+        if (Swap == Options["basepath", string] + "w") {
+            Swap = Options["basepath", string] + "w_2"
+        }
+    } VCubicSouthernW2 = "vCubicSouthernW2"
+    
+    function void vCommonGoudySymbols(Options:table, Char:string) {
+        local Select = ""
+        switch (Char) {
+            case "'", Select = "apostrophe", break
+            case "&", Select = "and", break
+            case ",", Select = "comma", break
+        }
+        if (Select != "") {
+            Swap = Options["basepath", string] + Select
+        }
+    } VCommonGoudySymbols = "vCommonGoudySymbols"
+    
+    function void vCommonSpartanSymbols(Options:table, Char:string) {
+        if (Char == "-") {
+            Swap = Options["basepath", string] + "dash"
+        } elseif (Char == ".") {
+            Swap = Options["basepath", string] + "prd"
+        }
+    } VCommonSpartanSymbols = "vCommonSpartanSymbols"
+    
+    function void vDashLiteral(Options:table, Char:string) {
+        if (Char == "-") {
+            Swap = Options["basepath", string] + "-"
+        }
+    } VDashLiteral = "vDashLiteral"
+    
+    function void vEmpty(Options:table, Char:string) {} VEmpty = "vEmpty"
+    
+    function void vGroveICG(Options:table, Char:string) {
+        local BasePath = Options["basepath", string]
+        switch (Char) {
+            case "a",
+                Swap = BasePath + "a"
+                break
+            case "b",
+                Swap = BasePath + "b"
+                break
+            case "c",
+                Swap = BasePath + "c"
+                break
+            case "d",
+                Swap = BasePath + "d"
+                break
+            case "x",
+                Swap = BasePath + "x"
+                break
+            case "-",
+                Swap = BasePath + "dash"
+                break
+        }
+    } VGroveICG = "vGroveICG"
+    
+    function void vGroveSMQ(Options:table, Char:string) {
+        local BasePath = Options["basepath", string]
+        switch (Char) {
+            case "a",
+                Swap = BasePath + "a"
+                break
+            case "b",
+                Swap = BasePath + "b"
+                break
+            case "c",
+                Swap = BasePath + "c"
+                break
+            case "d",
+                Swap = BasePath + "d"
+                break
+            case "f",
+                Swap = BasePath + "f"
+                break
+            case "r",
+                Swap = BasePath + "r"
+                break
+            case "s",
+                Swap = BasePath + "s"
+                break
+            case "-",
+                Swap = BasePath + "-"
+                break
+        }
+    } VGroveSMQ = "vGroveSMQ"
+    
+    function void vJintyNumberSymbol(Options:table, Char:string) {
+        if (Char == "#") {
+            Swap = Options["basepath", string] + "number_symbol"
+        }
+    } VJintyNumberSymbol = "vJintyNumberSymbol"
+    
+    function void tLower(Options:table, Char:string) {
+        Swap = Char:lower()
+    } TLower = "tLower"
+    
+    function void vMeem7segSpace(Options:table, Char:string) {
+        if (Char == " ") {
+            Swap = "fonts/tickingtimebombbb/off_6"
+        }
+    } VMeem7segSpace = "vMeem7segSpace"
+    
+    function void vPowertrainNW(Options:table, Char:string) {
+        local BasePath = Options["basepath_alpha", string]
+        switch (Char) {
+            case "n",
+                Swap = BasePath + "n"
+                break
+            case "o",
+                Swap = BasePath + "o"
+                break
+            case "r",
+                Swap = BasePath + "r"
+                break
+            case "f",
+                Swap = BasePath + "f"
+                break
+            case "l",
+                Swap = BasePath + "l"
+                break
+            case "k",
+                Swap = BasePath + "k"
+                break
+            case "a",
+                Swap = BasePath + "a"
+                break
+            case "d",
+                Swap = BasePath + "d"
+                break
+            case "w",
+                Swap = BasePath + "w"
+                break
+            case "e",
+                Swap = BasePath + "e"
+                break
+            case "s",
+                Swap = BasePath + "s"
+                break
+            case "t",
+                Swap = BasePath + "t"
+                break
+        }
+    } VPowertrainNW = "vPowertrainNW"
+    
+    function void vWAMNumbers(Options:table, Char:string) {
+        local BasePath = Options["basepath_numeric", string]
+        if (Char == "x") {
+            Swap = BasePath + "x"
+        } elseif (Char == "-") {
+            Swap = BasePath + "dash"
+        } else {
+            vNumeric(Options, Char)
+        }
+    } VWAMNumbers = "vWAMNumbers"
+    
+    function void vZexcivNeutraSlant5(Options:table, Char:string) {
+        if (Char == "5") {
+            Swap = Options["basepath_numeric", string] + "5_slant"
+        } else {
+            vNumeric(Options, Char)
+        }
+    } VZexcivNeutraSlant5 = "vZexcivNeutraSlant5"
+    
+    function void tUpper(Options:table, Char:string) {
+        Swap = Char:upper()
+    } TUpper = "tUpper"
+    
+    function void tIdentity(Options:table, Char:string) {
+        Swap = Char
+    } TIdentity = "tIdentity"
+    
+    
+    
+    # Initial state
+    ENT = !->Parent ? entity() : Parent
+    
+    Cur_Text = 1
+    Cur_Char = 0
+    Cur_Holo = 0
+    Cur_Inspect_Char = 0
+    State_UseFontFiles = 1
+    GuideOffset = vec(0, 18, 1)
+    Swap = ""
+    State_Current_Widths = array()
+    State_Current_Tops = array()
+    State_Current_Materials = array()
+    
+    # Axis holo to help out with positioning (index 0)
+    holoCreate(Cur_Holo)
+    holoModel(Cur_Holo, "models/sprops/misc/axis_plane.mdl")
+    holoPos(Cur_Holo, entity():toWorld(vec(0, 0, 3)))
+    holoAng(Cur_Holo, ENT:angles())
+    holoParent(Cur_Holo, entity())
+    Cur_Holo++
+    
+    timer("postInitialLoad", 100)
+    
+}
+
+elseif (clkName() == "postInitialLoad") {
+    # Load user config
+    local UserConfig = config()
+    if (UserConfig:count() == 0) {
+        entity():setName(format("%s (Edit me to configure!)", entity():getName()))
+        exit()
+    }
+    
+    # Don't edit these. I see you lookin...
+    foreach(I:number, Options:table = UserConfig) {
+        if (!Options:exists("text"))               { Options["text", string] = "" }
+        if (!Options:exists("font"))               { Options["font", string] = "trainbuild_spartan" }
+        if (!Options:exists("align"))              { Options["align", string] = TEXT_ALIGN_CENTER }
+        if (!Options:exists("material"))           { Options["material", string] = "icegt/loco/ice_trainmetal/white" }
+        if (!Options:exists("size"))               { Options["size", number] = 24 }
+        if (!Options:exists("char_padding"))       { Options["char_padding", number] = -0.25 }
+        if (!Options:exists("kerning"))            { Options["kerning", number] = ON }
+        if (!Options:exists("space_char_scale"))   { Options["space_char_scale", number] = 0.8 }
+        if (!Options:exists("size_z"))             { Options["size_z", number] = 1 }
+        if (!Options:exists("raise"))              { Options["raise", number] = 0.5 }
+        if (!Options:exists("color"))              { Options["color", vector] = vec(255) }
+        if (!Options:exists("position"))           { Options["position", vector] = vec(0) }
+        if (!Options:exists("angle"))              { Options["angle", angle] = ang(0) }
+        if (!Options:exists("angle_letter"))       { Options["angle_letter", angle] = ang(0) }
+    }
+    CONFIG = UserConfig
+    
+    precacheFonts()
+    if (FontRegistry:count() > 0) {
+        State_UseFontFiles = 0
+        entity():setName(format("%s (Portable mode)", entity():getName()))
+    }
+    
+    # Guide holo to display where the chip is drawing (index 1)
+    holoCreate(Cur_Holo)
+    holoModel(Cur_Holo, "models/sprops/misc/alphanum/alphanum_i.mdl")
+    holoAlpha(Cur_Holo, 0)
+    holoPos(Cur_Holo, entity():pos())
+    holoColor(Cur_Holo, vec(155, 255, 0))
+    holoMaterial(Cur_Holo, "models/debug/debugwhite")
+    holoScale(Cur_Holo, vec(1.5, 0.1, 2.5))
+    holoAng(Cur_Holo, entity():toWorld(ang(0, 90, 90)))
+    holoParent(Cur_Holo, entity())
+    Cur_Holo++
+       
+    timer("createCharHolo", 150)
+}
+
+elseif (clkName() == "cleanupGuideHolos") {
+    holoDelete(0)
+    holoDelete(1)
+}

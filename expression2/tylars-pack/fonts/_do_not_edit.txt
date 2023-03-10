@@ -1,0 +1,6 @@
+@name DO NOT EDIT THIS!
+#[
+    Hi! All the files in /tylars-pack/fonts/ (this folder) are not supposed to be edited!
+    They are included and used to draw text in /tylars-pack/protext.txt
+    If you edit these files, I cannot guarantee that things will work properly.
+]#

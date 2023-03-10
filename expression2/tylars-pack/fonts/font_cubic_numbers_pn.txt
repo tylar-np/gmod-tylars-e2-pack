@@ -1,0 +1,19 @@
+    # Cubic's Materials Pack - pn numbers
+    FontRegistry["cubic_numbers_pn", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "cubics_pack/numbers/pn/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "0" = 0.03,
+            "1" = 0.02,
+            "2" = 0.03,
+            "3" = 0.03,
+            "4" = 0.03,
+            "5" = 0.03,
+            "6" = 0.03,
+            "7" = 0.03,
+            "8" = 0.03,
+            "9" = 0.03
+        )
+    )
+    

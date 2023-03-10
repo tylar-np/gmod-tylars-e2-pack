@@ -1,0 +1,10 @@
+    # Gmod Trainbuild Public Decal Pack - Ebrima Bold (Numbers)
+    FontRegistry["trainbuild_numbers_ebrima", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "models/logos/fonts/ebrima_bold/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.0275
+        )
+    )
+    

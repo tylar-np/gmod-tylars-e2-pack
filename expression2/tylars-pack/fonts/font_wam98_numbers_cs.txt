@@ -1,0 +1,10 @@
+    # WAM's and Kei's Train Pack - Numbers (CS)
+    FontRegistry["wam98_numbers_cs", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "wam98_textures/cs/numberboard_font/",
+        "getpath" = array(VNumeric, VGroveICG),
+        "kerning_margin_x" = table(
+            "1" = -0.05
+        )
+    )
+    

@@ -1,0 +1,16 @@
+    # Cubic's Materials Pack - freight numbers (3-9 only)
+    FontRegistry["cubic_numbers_freight", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "cubics_pack/numbers/freight/",
+        "getpath" = array(VCubic3456789),
+        "kerning_margin_x" = table(
+            "3" = 0.02,
+            "4" = 0.02,
+            "5" = 0.02,
+            "6" = 0.02,
+            "7" = 0.02,
+            "8" = 0.02,
+            "9" = 0.02
+        )
+    )
+    

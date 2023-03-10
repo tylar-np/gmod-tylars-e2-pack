@@ -1,0 +1,32 @@
+    # Jinty's Texture Pack - Empire & Palisade #4's Cab font
+    FontRegistry["jinty_eandp4_cab", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "old_america/fonts/cab/",
+        "getpath" = array(VAlpha, VNumeric),
+        "kerning_margin_x" = table(
+            "a" = 0.06,
+            "i" = -0.07,
+            "k" = 0.04,
+            "m" = 0.04,
+            "n" = 0.02,
+            "q" = 0.02,
+            "r" = 0.03,
+            "u" = -0.015,
+            "w" = 0.04,
+            "z" = 0.02,
+            "1" = -0.02,
+            "2" = 0.02,
+            "3" = 0.02,
+            "4" = 0.02,
+            "5" = 0.02,
+            "6" = 0.02,
+            "7" = 0.02,
+            "8" = 0.02,
+            "9" = 0.02,
+            "0" = 0.02
+        ),
+        "kerning_margin_top" = table(
+            "q" = 0.045
+        )
+    )
+    

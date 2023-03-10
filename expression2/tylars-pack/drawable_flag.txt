@@ -1,0 +1,118 @@
+@name Drawable Flag
+@persist [E]:entity
+@persist [Model Material]:string [HIDX Scale]:number
+@persist [HoloPos]:vector [HoloAng]:angle
+@persist [COL_TRANS_PINK COL_TRANS_BLUE]:vector
+@persist [COL_ISRAEL_BLUE]:vector
+@persist [COL_WHITE]:vector
+@persist [Z55 Z45 Z35 Z25 Z15 Z05]:number
+@persist [Z9 Z89 Z79 Z69 Z59 Z49 Z39 Z29 Z19 Z09]:number
+@trigger none
+@model models/sprops/cylinders/size_2/cylinder_3x48.mdl
+
+if (first() | dupefinished()) {
+    # Offsets! Spacing is (Z(X-1)X - Z0X)/(X-1) each!
+    # Out of 5
+    Z55 = 520
+    Z45 = 490
+    Z35 = 475.5
+    Z25 = 461
+    Z15 = 446.5
+    Z05 = 420
+    
+    # Out of 9
+    Z99 = 520
+    Z89 = 490
+    Z79 = 482.75
+    Z69 = 475.5
+    Z59 = 468.25
+    Z49 = 461
+    Z39 = 453.75
+    Z29 = 446.5
+    Z19 = 439.25
+    Z09 = 420
+    
+    Model = "models/props_fairgrounds/fairgrounds_flagpole01.mdl"
+    Material = "models/debug/debugwhite"
+    Scale = 0.25
+    
+    # Define some colors
+    COL_TRANS_PINK = vec(229, 142, 187)
+    COL_TRANS_BLUE = vec(0, 161, 255)
+    COL_ISRAEL_BLUE = vec(0, 56, 184)
+    COL_WHITE = vec(255)
+    
+    E = entity()
+    HIDX = 0
+    HoloPos = E:toWorld(vec(0, -3.7, -112))
+    HoloAng = E:toWorld(ang(0, 0, -2))
+    
+    E:setAlpha(1)
+    E:setMaterial("magtrains/invisible")
+}
+
+function void createPole() {
+    holoCreate(HIDX)
+    holoModel(HIDX, "models/props_fairgrounds/fairgrounds_flagpole01.mdl")
+    holoPos(HIDX, HoloPos)
+    holoAng(HIDX, HoloAng)
+    holoScale(HIDX, vec(Scale))
+    holoColor(HIDX, vec(0))
+    holoMaterial(HIDX, Material)
+    holoParent(HIDX, E)
+    holoAnim(HIDX, "Idle")
+    
+    holoClipEnabled(HIDX, 1, 1)
+    holoClipEnabled(HIDX, 2, 1)
+    holoClip(HIDX, 1, vec(0, -3 * Scale, 0), vec(0, 1, 0), 0)
+    holoClip(HIDX, 2, vec(0, 0, 348 * 0.25), vec(0, 0, 1), 0)
+    
+    HIDX++
+}
+
+createPole()
+
+function void createStripe(Color:vector, ZTop:number, ZBottom:number) {
+    holoCreate(HIDX)
+    holoModel(HIDX, Model)
+    holoPos(HIDX, HoloPos)
+    holoAng(HIDX, HoloAng)
+    holoScale(HIDX, vec(Scale))
+    holoColor(HIDX, Color)
+    holoMaterial(HIDX, Material)
+    holoParent(HIDX, E)
+    holoAnim(HIDX, "Idle")
+    
+    holoClipEnabled(HIDX, 1, 1)
+    holoClipEnabled(HIDX, 2, 1)
+    holoClipEnabled(HIDX, 3, 1)
+    holoClip(HIDX, 1, vec(0, 0, ZTop*Scale), vec(0, 0.25, -1), 0)
+    holoClip(HIDX, 2, vec(0, -3*Scale, 0), vec(0, -1, 0), 0)
+    holoClip(HIDX, 3, vec(0, 0, ZBottom*Scale), vec(0, -0.25, 1), 0) # -0.25
+    
+    HIDX++
+}
+
+
+
+
+function void flag_trans() {
+    createStripe(COL_TRANS_BLUE, Z55, Z45)
+    createStripe(COL_TRANS_PINK, Z45, Z35)
+    createStripe(COL_WHITE, Z35, Z25)
+    createStripe(COL_TRANS_PINK, Z25, Z15)
+    createStripe(COL_TRANS_BLUE, Z15, Z05)
+}
+
+function void flag_israel() {
+    createStripe(COL_WHITE, Z99, Z89)
+    createStripe(COL_ISRAEL_BLUE, Z89, Z79)
+    createStripe(COL_WHITE, Z79, Z49)
+    createStripe(COL_ISRAEL_BLUE, Z49, Z39)
+    createStripe(COL_WHITE, Z39, Z19)
+}
+
+
+
+flag_trans()
+#flag_israel()

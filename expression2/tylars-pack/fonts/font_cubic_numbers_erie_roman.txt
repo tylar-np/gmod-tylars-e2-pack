@@ -1,0 +1,19 @@
+    # Cubic's Materials Pack - erie_roman numbers
+    FontRegistry["cubic_numbers_erie_roman", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "cubics_pack/numbers/erie_roman/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "0" = 0.02,
+            "1" = 0,
+            "2" = 0.02,
+            "3" = 0.02,
+            "4" = 0.05,
+            "5" = 0.04,
+            "6" = 0.02,
+            "7" = 0.02,
+            "8" = 0.02,
+            "9" = 0.02
+        )
+    )
+    

@@ -1,0 +1,42 @@
+    # Gmod Trainbuild Public Decal Pack - Ebrima Bold (Numbers)
+    FontRegistry["grove_sylfaen", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "railwaylogos/generic/font_sylfaen/",
+        "getpath" = array(VAlpha, VNumeric, VDashLiteral),
+        "kerning_margin_x" = table(
+            "a" = -0.01,
+            "b" = -0.02,
+            "e" = -0.0225,
+            "f" = -0.0225,
+            "g" = 0.01,
+            "h" = -0.01,
+            "i" = -0.115,
+            "h" = -0.02,
+            "l" = -0.03,
+            "j" = -0.07,
+            "m" = 0.08,
+            "n" = -0.01,
+            "o" = -0.01,
+            "p" = -0.06,
+            "q" = 0.04,
+            "r" = -0.02,
+            "s" = -0.0225,
+            "t" = 0.01,
+            "u" = -0.02,
+            "w" = 0.09,
+            "x" = -0.02,
+            "z" = -0.02,
+            "0" = -0.055,
+            "1" = -0.115,
+            "2" = -0.055,
+            "3" = -0.055,
+            "4" = -0.055,
+            "5" = -0.055,
+            "6" = -0.055,
+            "7" = -0.055,
+            "8" = -0.055,
+            "9" = -0.055,
+            "-" = -0.065
+        )
+    )
+    

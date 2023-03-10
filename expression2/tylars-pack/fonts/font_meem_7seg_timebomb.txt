@@ -1,0 +1,20 @@
+    # Meem Train Parts Pack - Ticking Timebomb (7-segment thing)
+    FontRegistry["meem_7seg_timebomb", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "fonts/tickingtimebombbb/num_",
+        "getpath" = array(VNumeric, VMeem7segSpace),
+        "kerning_margin_x" = table(
+            "0" = 0.049,
+            "1" = 0.049,
+            "2" = 0.049,
+            "3" = 0.049,
+            "4" = 0.049,
+            "5" = 0.049,
+            "6" = 0.049,
+            "7" = 0.049,
+            "8" = 0.049,
+            "9" = 0.049,
+            " " = 0.049
+        )
+    )
+    

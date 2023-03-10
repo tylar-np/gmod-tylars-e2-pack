@@ -1,0 +1,25 @@
+    # Cubic's Materials Pack - up (non outlined)
+    FontRegistry["cubic_up", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "cubics_pack/fonts/up/",
+        "getpath" = array(VAlpha),
+        "kerning_margin_x" = table(
+            "a" = 0.01,
+            "e" = -0.0225,
+            "f" = -0.0225,
+            "g" = 0.045,
+            "h" = -0.01,
+            "i" = -0.115,
+            "j" = 0.01,
+            "m" = 0.08,
+            "n" = 0.025,
+            "o" = 0.045,
+            "p" = -0.02,
+            "q" = 0.04,
+            "r" = -0.02,
+            "s" = -0.0225,
+            "t" = 0.01,
+            "w" = 0.07
+        )
+    )
+    

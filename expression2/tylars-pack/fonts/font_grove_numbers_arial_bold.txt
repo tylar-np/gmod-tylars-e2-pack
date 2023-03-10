@@ -1,0 +1,10 @@
+    # Grove's Shared Textures - Arial Bold (Numbers)
+    FontRegistry["grove_numbers_arial_bold", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "railwaylogos/generic/numbers_arial_bold/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.05
+        )
+    )
+    
