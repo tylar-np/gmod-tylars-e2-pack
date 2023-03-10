@@ -1,0 +1,661 @@
+@name RepLC V0.0.6 ALPHA
+@model models/sprops/misc/alphanum/alphanum_arrow_b.mdl
+@persist [SELF]:entity
+
+#[
+    Tylar's Replica Loco Chip (RepLC) V0.0.6 ALPHA
+    Things to wire:
+        Pod controller's Active output to the Active input
+        Control_ThrottleUp and Control_ThrottleDown (recommend Pod Controller's W and S outputs for these)
+        Control_Handbrake (recommend Pod Controller's Space output)
+        Control_Reverser_Forward and Control_Reverser_Back (recommend Pod Controller's D and A outputs for these)
+        Control_Safety_Switch (optional - recommend Pod Controller's Alt output - hold to change reverser and handbrake)
+        Control_StartStopEngine - recommend a physical button for this (non toggle). Then wire the pod controller's
+            Enable Buttons and Crosshairs inputs to the pod's Active output.
+        Toggle_ForceHighIdle - (optional) if you wanna force high idle all the time for some reason
+        Toggle_ThrottleSlow (optional) Hold to adjust the throttle slowly. The adjustment rates can be configured.
+    
+    Then look through the "Config block" (line 90) and make sure everything looks right to you
+    
+    Changes in 0.0.6 (from 0.0.5):
+        - Add a "TargetSpeed" output for the new RepLC Diesel Exhaust.
+        - Backwards-compatible with 0.0.5 control stands.
+]#
+
+# ====================
+# INPUTS
+# ====================
+# All these Control_ inputs should be wired to a NON-TOGGLE switch (like a non-toggled button or a pod controller key)
+# "Active" is of course the Active output from the driver seat's pod controller
+@inputs [Active Control_Handbrake Control_Reverser_Back Control_Reverser_Forward]:number
+@inputs [Control_Safety_Switch Control_StartStopEngine Control_ThrottleUp Control_ThrottleDown]:number
+@inputs [Toggle_ForceHighIdle Toggle_ThrottleSlow]:number
+# EngineBogey1 is the front bogey on your engine; EngineBogey2 is the rear one
+# Wire ForceEntity if you are using CFG_Operation_ForceMode = "entity" (explained in the config block under all this.)
+@inputs [EngineBogey1 EngineBogey2 ForceEntity]:entity
+
+# ====================
+# OUTPUTS
+# ====================
+@outputs [CPUUsage Downforce DownforceMax EngineStateCode HandbrakeOn HighIdling Notch NotchRelativeThrottle Ops]:number
+@outputs [Reverser SpeedKPH SpeedKPHMax SpeedMPH SpeedMPHMax SpeedUPS SpeedUPSMax TargetSpeedMPH Throttle]:number
+@persist [CPUUsage Downforce DownforceMax EngineStateCode HandbrakeOn HighIdling Notch NotchRelativeThrottle Ops]:number
+@persist [Reverser SpeedKPH SpeedKPHMax SpeedMPH SpeedMPHMax SpeedUPS SpeedUPSMax TargetSpeedMPH Throttle]:number
+
+
+# ====================
+# TRIGGERS
+# ====================
+@trigger Active Control_Handbrake Control_Reverser_Back Control_Reverser_Forward Control_StartStopEngine EngineBogey1 EngineBogey2 Toggle_ForceHighIdle
+
+
+# ================================================
+# PERSISTENT VALUES
+# Split into categories based on what they're for.
+# ================================================
+# Configured values (set/change these in the Config Block)
+@persist [CFG_Chip_Interval]:number
+@persist [CFG_Chip_Name]:string
+@persist [CFG_Holo_Bogies]:number
+@persist [CFG_Downforce_Enabled CFG_Downforce_MaxForce CFG_Downforce_SplitForce]:number
+@persist [CFG_Downforce_SpeedBegin CFG_Downforce_SpeedEnd]:number
+@persist [CFG_Downforce_ApplyMode]:string
+@persist [CFG_Operation_DoEngineStartProcedures CFG_Operation_DoFakeNotchSounds]:number
+@persist [CFG_Operation_ForceMultiplier CFG_Operation_MaxSpeed]:number
+@persist [CFG_Operation_PostStartHighIdleTime_High CFG_Operation_PostStartHighIdleTime_Low]:number
+@persist [CFG_Operation_ThrottleDeadzoneSize CFG_Operation_ThrottleSpeedNormal CFG_Operation_ThrottleSpeedSlow]:number
+@persist [CFG_Operation_ForceMode CFG_Operation_PhysProp_NoBrakes CFG_Operation_PhysProp_Handbrake]:string
+@persist [CFG_Operation_UnitScale]:string
+@persist [CFG_Sound_NotchThresholds]:array
+@persist [CFG_Sound_EnginePosition]:vector
+@persist [CFG_Sound_EnableEngineDSP CFG_Sound_EngineLevel CFG_Sound_DistantLevel CFG_Sound_DistantDSP]:number
+@persist [CFG_Sound_EngineLoop CFG_Sound_Handbrake_Off CFG_Sound_Handbrake_On CFG_Sound_NotchSoundPath]:string
+
+# State variables - may change from execution to execution
+@persist [State_ForceEntity]:entity
+@persist [State_CachedForceEntity State_EngineMoment State_HighIdlingAfterStartup State_LastReverserMovement]:number
+@persist [State_Notch State_Receive State_Reverser State_SpeedScale State_Throttle State_Throttle_Compensated]:number
+@persist [State_EBogey1_Physprop State_EBogey2_Physprop State_PrimedEngineSound]:string
+
+# Indices for things like sounds and holos
+@persist [IDX_HOLO_BOGEY_1 IDX_HOLO_BOGEY_2 IDX_HOLO_SOUND_ENGINE]:number
+@persist [IDX_SOUND_ENGINE IDX_SOUND_ENGINE_DISTANT]:number
+@persist [IDX_SOUND_HANDBRAKE_FRONT IDX_SOUND_HANDBRAKE_REAR IDX_SOUND_REVERSER_LEVER]:number
+@persist [HOLO_ENT_SOUND_ENGINE]:entity
+
+
+
+
+
+if (first() | dupefinished()) {
+    
+    
+    
+    # ========================
+    # CONFIG BLOCK (edit me!)
+    # ========================
+    # !!!!! TO SEE WHAT ALL THE OPTIONS DO...   <------------ !!!!!
+    # Check out the __config_0_0_5__.txt file included in the tylars_pack/replc/ folder.
+    #   * All "speed" options should be given in source units per second (UPS).
+    #     2347 units per second is 100 MPH, worldscale.
+    #     See tylars_pack/replc/__reference__.txt for a conversion table and formulae.
+    #   * At the end, there is an example config for "OLC Mode," which will make
+    #     RepLC run exactly like OLC, if that's what you want to do.
+    
+    
+    # =======================================
+    # === Chip things =======================
+    # =======================================
+    CFG_Chip_Name = entity():getName()
+    CFG_Chip_Interval = 30 # Undefined behavior will happen if you modify this.
+
+    # =======================================
+    # === Downforce =========================
+    # =======================================
+    CFG_Downforce_Enabled = 1
+        CFG_Downforce_ApplyMode = "both"  # "both" | "bogies" | "driver"
+        CFG_Downforce_MaxForce = 50000
+        CFG_Downforce_SpeedBegin = 150
+        CFG_Downforce_SpeedEnd = 2347 * (50/100) # 2347 units per sec == 100 mph worldscale
+        CFG_Downforce_SplitForce = 0
+
+
+    # =======================================
+    # === Train Operation / Behavior ========
+    # =======================================
+    CFG_Operation_DoEngineStartProcedures = 1
+        CFG_Operation_PostStartHighIdleTime_Low = 70
+        CFG_Operation_PostStartHighIdleTime_High = 110
+    CFG_Operation_DoFakeNotchSounds = 1
+    CFG_Operation_Forcemode = "entity"  # "entity" | "weld"  -  if "entity", you must wire a ForceEntity!
+    CFG_Operation_ForceMultiplier = 1.0
+    CFG_Operation_MaxSpeed = 2347 * (65/100) # 2347 units == 100 mph worldscale.
+    CFG_Operation_PhysProp_Handbrake = "metal"
+    CFG_Operation_PhysProp_NoBrakes = "gmod_ice" # "gmod_ice" is normally called Super Ice
+    CFG_Operation_ThrottleDeadzoneSize = 4
+    CFG_Operation_ThrottleSpeedNormal = 0.5
+    CFG_Operation_ThrottleSpeedSlow = 0.125
+    CFG_Operation_UnitScale = "world"
+
+    # =======================================
+    # === Sounds ============================
+    # =======================================
+    CFG_Sound_Engine_Position = vec(0, 0, -180) # (Relative to chip)
+    CFG_Sound_Handbrake_Off = "gsgtrainsounds/misc/air_off.wav"
+    CFG_Sound_Handbrake_On = "gsgtrainsounds/misc/air_on.wav"
+    CFG_Sound_EnableEngineDSP = 1
+        CFG_Sound_DistantDSP = 15
+        CFG_Sound_DistantLevel = 100
+    CFG_Sound_EngineLevel = 85
+    # CFG_Operation_DoFakeNotchSounds == 0?
+        CFG_Sound_EngineLoop = "wam98_sounds/trains/engines/emd645e3v20/notch2.wav"
+    # CFG_Operation_DoFakeNotchSounds == 1?
+        CFG_Sound_NotchSoundPath = "wam98_sounds/trains/engines/emd645e3cv16"
+        CFG_Sound_NotchThresholds = array(
+            1,  # Notch 1: this throttle setting at the low end. Keep this at 1!!! 0 and only 0 is considered "idle"
+            15, # Notch 2: this throttle setting at the low end
+            30, # ...
+            40,
+            55,
+            70,
+            85,
+            95  # Notch 8: this throttle setting at the low end
+        )
+    
+    # =======================================
+    # === Holoing ===========================
+    # =======================================
+    CFG_Holo_Bogies = 1
+    
+    
+    
+    
+    
+    
+    # =========================================================
+    # EXAMPLE CONFIG: OLC mode
+    # Uncomment this stuff to configure RepLC exactly like OLC!
+    # (Weld the chip and make sure the arrow points towards the
+    #  forward direction of motion)
+    # =========================================================
+    #[
+        CFG_Downforce_Enabled = 0
+        CFG_Holo_Bogies = 0
+        CFG_Operation_DoEngineStartProcedures = 0
+        CFG_Operation_DoFakeNotchSounds = 0
+        CFG_Sound_EngineLevel = 80
+        CFG_Operation_Forcemode = "weld"
+        CFG_Operation_ForceMultiplier = 1.0
+        CFG_Operation_PhysProp_NoBrakes = "gmod_ice" # "gmod_ice" is normally called Super Ice
+        CFG_Operation_PhysProp_Handbrake = "metal"
+        CFG_Operation_ThrottleDeadzoneSize = 2
+        CFG_Sound_EnableEngineDSP = 0
+        CFG_Sound_EngineLoop = "wam98_sounds/trains/engines/emd645e3v20/notch2.wav"
+        CFG_Sound_Engine_Position = vec(0)
+        CFG_Sound_Handbrake_On = "gsgtrainsounds/misc/air_on.wav"
+        CFG_Sound_Handbrake_Off = "gsgtrainsounds/misc/air_off.wav"
+    ]#
+    
+    
+    
+    
+
+
+
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+    #        This is the end of the editable config area!          #
+    #        Don't edit below under normal circumstances.          #
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+
+
+
+    # ============================================================
+    #  Initialize defaults (config block ends here - do not edit)
+    # ============================================================
+    SELF = entity()
+    SELF:setName(CFG_Chip_Name)
+    
+    State_CachedForceEntity = 0
+    State_EBogey1_Physprop = CFG_Operation_PhysProp_Handbrake
+    State_EBogey2_Physprop = CFG_Operation_PhysProp_Handbrake
+    State_EngineMoment = 0
+    State_HighIdlingAfterStartup = 0
+    State_LastReverserMovement = 0 # time
+    State_Notch = 0
+    State_PrimedEngineSound = ""
+    State_SpeedScale = CFG_Operation_UnitScale == "player" ? 1.33333333333 : 1
+    State_Receive = 0
+    State_Reverser = 0 # [-1, 0, 1]
+    State_Throttle = 0
+    State_WorldUp = vec(0, 0, 1)
+    
+    # Sound indices
+    IDX_SOUND_ENGINE = 1
+    IDX_SOUND_ENGINE_DISTANT = 3
+    IDX_SOUND_REVERSER_LEVER = 5
+    IDX_SOUND_HANDBRAKE_FRONT = 7
+    IDX_SOUND_HANDBRAKE_REAR = 9
+    
+    IDX_HOLO_BOGEY_1 = 0
+    IDX_HOLO_BOGEY_2 = 1
+    IDX_HOLO_SOUND_ENGINE = 2
+    
+    # Outputs
+    Downforce = 0
+    DownforceMax = (CFG_Downforce_Enabled != 0) * CFG_Downforce_MaxForce
+    SpeedUPS = 0
+    SpeedMPH = 0
+    SpeedKPH = 0
+    TargetSpeedMPH = 0
+    Throttle = 0
+    HandbrakeOn = 1
+    HighIdling = 0
+    Notch = 0
+    Reverser = 0
+    CPUUsage = 0
+    SpeedUPSMax = CFG_Operation_MaxSpeed
+    SpeedMPHMax = round(CFG_Operation_MaxSpeed * 0.04261363636 * State_SpeedScale)
+    SpeedKPHMax = round(CFG_Operation_MaxSpeed * 0.06857386363 * State_SpeedScale)
+    
+    # Sanitize
+    CFG_Operation_ThrottleDeadzoneSize = abs(CFG_Operation_ThrottleDeadzoneSize)
+    
+    A = SELF:getAlpha()
+    SELF:setColor(vec4(0, 255, 0, A))
+    
+    # Create holo for the engine sound position
+    holoCreate(IDX_HOLO_SOUND_ENGINE)
+    holoModel(IDX_HOLO_SOUND_ENGINE, "models/sprops/misc/axis_plane.mdl")
+    holoPos(IDX_HOLO_SOUND_ENGINE, SELF:toWorld(CFG_Sound_Engine_Position))
+    holoAng(IDX_HOLO_SOUND_ENGINE, SELF:angles())
+    holoParent(IDX_HOLO_SOUND_ENGINE, SELF)
+    holoAlpha(IDX_HOLO_SOUND_ENGINE, 0) # Uncomment if you wanna see the position
+    HOLO_ENT_SOUND_ENGINE = holoEntity(IDX_HOLO_SOUND_ENGINE)
+    
+    interval(CFG_Chip_Interval)
+    
+
+} else { # end first | dupefinished
+    # This block holds stuff that needs to get refreshed/set every time the chip executes, for whatever reason.
+    # To save on vector and function calls, cache some values here (since we would have done so in the interval anyway)
+    # and then just reference SpeedUPS in the chip for the current speed in Units/Second.
+    SpeedUPS = State_ForceEntity ? State_ForceEntity:vel():length() : 0
+    SpeedMPH = round(SpeedUPS * 0.04261363636 * State_SpeedScale)
+    SpeedKPH = round(SpeedUPS * 0.06857386363 * State_SpeedScale)
+}
+
+# =================================================
+#  Helper functions
+# =================================================
+
+function number state_getCurrentNotch() {
+    if (Throttle == 0) {
+        return 0
+    }
+    
+    local LastNotch = 0
+    
+    for (I=1, CFG_Sound_NotchThresholds:count()) {
+        local SpeedThreshold = CFG_Sound_NotchThresholds[I,number]
+        if (abs(Throttle) < SpeedThreshold) {
+            return I - 1
+        }
+    }
+    
+    return 8
+}
+
+function void sound_startNotchTransition(ForceTransitionSound:string) {
+    if (State_EngineMoment != 2) { return }
+    local CurNotch = state_getCurrentNotch()
+    TargetSpeedMPH = CFG_Sound_NotchThresholds[CurNotch, number]
+    
+    local TransitionSound = ForceTransitionSound
+    
+    if (TransitionSound == "") {
+        if ((Reverser != State_Reverser) & (CurNotch == 0) & !State_HighIdlingAfterStartup) {
+            TransitionSound = HighIdling ? "down/idle-idle_low.wav" : "up/idle_low-idle.wav"
+        } elseif (CurNotch != State_Notch) {
+            if (CurNotch + State_Notch > 1) {
+                local Direction = CurNotch > State_Notch ? "up" : "down"
+                TransitionSound = format("%s/%d-%db.wav", Direction, State_Notch, CurNotch)
+            } elseif (!HighIdling) {
+                TransitionSound = CurNotch == 0 ? "down/idle-idle_low.wav" : "up/idle_low-idle.wav"
+            }
+        }
+    }
+
+    State_Notch = CurNotch
+    
+    if (TransitionSound != "") {
+        local SoundToPlay = format("%s/transitions/%s", CFG_Sound_NotchSoundPath, TransitionSound)
+        soundStop(IDX_SOUND_ENGINE)
+        HOLO_ENT_SOUND_ENGINE:soundPlay(IDX_SOUND_ENGINE, 0, SoundToPlay)
+        soundLevel(IDX_SOUND_ENGINE, CFG_Sound_EngineLevel)
+        if (CFG_Sound_EnableEngineDSP) {
+            soundStop(IDX_SOUND_ENGINE_DISTANT)
+            entity():soundPlay(IDX_SOUND_ENGINE_DISTANT, 0, SoundToPlay)
+            soundDSP(IDX_SOUND_ENGINE_DISTANT, CFG_Sound_DistantDSP)
+            soundLevel(IDX_SOUND_ENGINE_DISTANT, CFG_Sound_DistantLevel)
+        }
+        stoptimer("ENGINE_TRANSITION")
+        timer("ENGINE_TRANSITION", soundDuration(SoundToPlay) * 995)
+    }
+}
+
+function void holo_cloneBogey(Bogey:entity, Idx:number) {
+    holoCreate(Idx)
+    holoPos(Idx, Bogey:pos())
+    holoAng(Idx, Bogey:angles())
+    holoParent(Idx, Bogey)
+    
+    # Copy basic stuff
+    holoModel(Idx, Bogey:model())
+    holoColor(Idx, Bogey:getColor4())
+    holoSkin(Idx, Bogey:getSkin())
+    holoMaterial(Idx, Bogey:getMaterial())
+    
+    local E = holoEntity(Idx)
+    for (I=0,32) {
+        local SM = Bogey:getSubMaterial(I)
+        if (SM != "") {
+            E:setSubMaterial(I, SM)
+        }
+    }
+    
+    for (I=0,64) {
+        local SubBGCount = Bogey:getBodygroups(I)
+        if (SubBGCount > 1) {
+            local Choice = Bogey:getBodygroup(I)
+            if (Choice != 0) {
+                E:setBodygroup(I, Choice)
+            }
+        }
+    }
+}
+
+function void state_refreshHighIdle() {
+    HighIdling = Toggle_ForceHighIdle | State_HighIdlingAfterStartup | (State_Reverser != 0)
+}
+
+
+
+# =================================================
+#  Do the main loop logic first. (Most likely)
+# =================================================
+if (clk()) {
+    # Basic "Power saving" - run interval less often if engine is off and player is away.
+    if (State_EngineMoment != 2 && !Active) {
+        interval(1000)  
+    } else {
+        interval(CFG_Chip_Interval)
+    }
+    
+    # Handle normal wire inputs. TODO: handle/send received inputs.
+    if (!State_Receive) {
+        # Handle the throttle state.
+        if (bXor(Control_ThrottleUp, Control_ThrottleDown)) {
+            local ApplyThrottleAmount = 0
+            local ThrotAdd = Toggle_ThrottleSlow ? CFG_Operation_ThrottleSpeedSlow : CFG_Operation_ThrottleSpeedNormal
+            if (Control_ThrottleUp) {
+                ApplyThrottleAmount = ThrotAdd
+            }
+            if (Control_ThrottleDown) {
+                ApplyThrottleAmount = -ThrotAdd
+            }
+            
+            # Throttle state will be limited to [-100, 100] plus or minus the CFG_Operation_ThrottleDeadzoneSize.
+            # "Throttle" is the "faked" value that is both output and used to calculate force needed.
+            local Throttle_DeadzoneSize = CFG_Operation_DoFakeNotchSounds ? 1 : CFG_Operation_ThrottleDeadzoneSize
+            local Throttle_Min = (CFG_Operation_DoFakeNotchSounds ? 0 : -100) - Throttle_DeadzoneSize
+            local Throttle_Max = 100 + Throttle_DeadzoneSize
+            State_Throttle = max(Throttle_Min, min(State_Throttle + ApplyThrottleAmount, Throttle_Max))
+            Throttle = floor(sign(State_Throttle) * max(0, abs(State_Throttle) - Throttle_DeadzoneSize))
+            
+            if (State_EngineMoment == 2) {
+                if (!CFG_Operation_DoFakeNotchSounds) {
+                    local EngineSoundPitch = abs(Throttle) / 2
+                    soundPitch(IDX_SOUND_ENGINE, 100 + EngineSoundPitch)
+                } else {
+                    sound_startNotchTransition("")
+                }
+            }
+        }
+    }
+        
+    # Apply movement force to the locomotive.
+    # It will try to cache State_ForceEntity if it isn't cached.
+    local ForceDirection = (State_Reverser || !CFG_Operation_DoFakeNotchSounds)
+    if (ForceDirection && State_EngineMoment == 2 && Throttle != 0) {
+        if (!State_ForceEntity) {
+            State_ForceEntity = CFG_Operation_ForceMode == "weld" ? SELF:isWeldedTo() : ForceEntity
+        }
+        if (State_ForceEntity) {
+            # vel():length() returns the Units/Sec velocity of the State_ForceEntity entity.
+            if (abs(State_ForceEntity:vel():length()) < CFG_Operation_MaxSpeed * (abs(Throttle) / 100)) { # Speed limit
+                local Up = SELF:up()
+                State_ForceEntity:applyForce(ForceDirection * Up * (Throttle * 5000 * CFG_Operation_ForceMultiplier))
+            }
+        }
+    }
+    
+    # Downforce things.
+    if (State_ForceEntity) {
+        local NewDownforce = 0
+        if (CFG_Downforce_Enabled & (SpeedUPS > CFG_Downforce_SpeedBegin)) {
+            local F = min((SpeedUPS - CFG_Downforce_SpeedBegin) / (CFG_Downforce_SpeedEnd-CFG_Downforce_SpeedBegin), 1)
+            if (F > 0.0025) {
+                Mode = CFG_Downforce_ApplyMode
+                ApplyForceBogey1 = Mode == "bogies" | Mode == "both"
+                ApplyForceBogey2 = ApplyForceBogey1
+                ApplyForceDriver = (Mode == "driver") | (
+                    (Mode == "both") & 
+                    (EngineBogey1 != State_ForceEntity) & 
+                    (EngineBogey2 != State_ForceEntity)
+                )
+                
+                NewDownforce = F * CFG_Downforce_MaxForce
+                local Impulse = vec(0, 0, -Downforce)
+                if (CFG_Downforce_SplitForce) {
+                    Impulse = Impulse / max(1, ApplyForceBogey1 + ApplyForceBogey2 + ApplyForceDriver)
+                }
+                
+                if (ApplyForceBogey1) {
+                    EngineBogey1:applyForce(Impulse)
+                }
+                if (ApplyForceBogey2) {
+                    EngineBogey2:applyForce(Impulse)
+                }
+                if (ApplyForceDriver) {
+                    State_ForceEntity:applyForce(Impulse)
+                }
+            }
+        }
+        Downforce = NewDownforce
+    } else {
+        Downforce = 0
+    }
+    
+    # Format other outputs.
+    # Speed values were set at the start of the interval, no need to set them again here.
+    # HighIdling was set above for optimization but might have changed further through the main loop.
+    Notch = State_Notch
+    Reverser = State_Reverser
+    EngineStateCode = State_EngineMoment
+    NotchRelativeThrottle = 0
+    Ops = ops()
+    CPUUsage = cpuUsage() * 1000000
+    state_refreshHighIdle()
+    
+    if (CFG_Operation_DoFakeNotchSounds && Notch > 0) {
+        local LowSetting = 0
+        local HighSetting = 100
+        if (Notch > 1) {
+            LowSetting = CFG_Sound_NotchThresholds[Notch, number]
+        }
+        if (Notch < 8) {
+            HighSetting = CFG_Sound_NotchThresholds[Notch + 1, number]
+        }
+        NotchRelativeThrottle = 100 * ((Throttle - LowSetting) / (HighSetting - LowSetting))
+    }
+}
+
+
+
+# =================================================
+#  Handle engine state timers
+# =================================================
+elseif (clkName() != "") {
+    local TimerName = clkName()
+    local DoPlayEngineLoop = 0
+
+    if (TimerName == "ENGINE_START_FINISH") {
+        State_EngineMoment = 2
+        DoPlayEngineLoop = 1
+        State_HighIdlingAfterStartup = 1
+        state_refreshHighIdle()
+        local ExitLowIdleDelay_Min = CFG_Operation_PostStartHighIdleTime_Low * 1000
+        local ExitLowIdleDelay_Max = CFG_Operation_PostStartHighIdleTime_High * 1000
+        timer("ENGINE_STARTUP_GO_LOW_IDLE", randint(ExitLowIdleDelay_Min, ExitLowIdleDelay_Max))
+    } elseif (TimerName == "ENGINE_SHUTDOWN_FINISH") {
+        State_EngineMoment = 0
+        soundStop(IDX_SOUND_ENGINE)
+        soundStop(IDX_SOUND_ENGINE)
+    } elseif (TimerName == "ENGINE_STARTUP_GO_LOW_IDLE") {
+        State_HighIdlingAfterStartup = 0
+        state_refreshHighIdle()
+        if (state_getCurrentNotch() == 0 & !HighIdling) {
+            sound_startNotchTransition("down/idle-idle_low.wav")
+        }
+    } elseif (TimerName == "ENGINE_TRANSITION") {
+        if (State_EngineMoment == 2) {
+            DoPlayEngineLoop = 1
+        }
+    }
+
+    if (DoPlayEngineLoop) {
+        local CurNotch = state_getCurrentNotch()
+        local LoopSound = ""
+        if (CurNotch == 0) {
+            LoopSound = format("%s/%s", CFG_Sound_NotchSoundPath, HighIdling ? "/idle.wav" : "/idle_low.wav")
+        } elseif (CurNotch == 1) {
+            LoopSound = format("%s/idle.wav", CFG_Sound_NotchSoundPath)
+        } else {
+            LoopSound = format("%s/notch%d.wav", CFG_Sound_NotchSoundPath, CurNotch)
+        }
+        soundStop(IDX_SOUND_ENGINE)
+        HOLO_ENT_SOUND_ENGINE:soundPlay(IDX_SOUND_ENGINE, 0, LoopSound)
+        soundLevel(IDX_SOUND_ENGINE, CFG_Sound_EngineLevel)
+        if (CFG_Sound_EnableEngineDSP) {
+                soundStop(IDX_SOUND_ENGINE_DISTANT)
+                entity():soundPlay(IDX_SOUND_ENGINE_DISTANT, 0, LoopSound)
+                soundLevel(IDX_SOUND_ENGINE_DISTANT, CFG_Sound_DistantLevel)
+                soundDSP(IDX_SOUND_ENGINE_DISTANT, CFG_Sound_DistantDSP)
+            }
+    }
+}
+
+
+
+# =================================================
+#  Handle triggered values.
+# =================================================
+elseif (!clk()) {
+    # Safety switch should either be unwired, or wired and engaged, to handle control input.
+    if ((!->Control_Safety_Switch) | (Control_Safety_Switch == 1)) {
+
+        # Reverser logic. Should be bound to a non-toggle 1/0 input for both _Forward and _Back.
+        if (CFG_Operation_DoFakeNotchSounds & (~Control_Reverser_Forward | ~Control_Reverser_Back)) {
+            local Old_State_Reverser = State_Reverser
+            State_Reverser = max(-1, min(State_Reverser + Control_Reverser_Forward - Control_Reverser_Back, 1))
+            if (State_Reverser != Old_State_Reverser) {
+                sound_startNotchTransition("") # reverser will affect high vs low idle
+            }
+        }
+        
+        elseif (CFG_Operation_DoEngineStartProcedures & ~Control_StartStopEngine & (State_EngineMoment % 2 == 0)) {
+            # This is where we need to start/stop the engine depending on State_EngineMoment.
+            # State_EngineMoment == 0 : Engine is off
+            # State_EngineMoment == 1 : Engine is starting up
+            # State_EngineMoment == 2 : Engine is running
+            # State_EngineMoment == 3 : Engine is shutting down
+            State_EngineMoment = (State_EngineMoment + 1) % 4
+    
+            local SoundPath = ""
+            local TimerName = ""
+    
+            if (State_EngineMoment == 1) {
+                SoundPath = CFG_Sound_NotchSoundPath + "/startup_high.wav"
+                TimerName = "ENGINE_START_FINISH"
+            } elseif (State_EngineMoment == 3) {
+                stoptimer("ENGINE_TRANSITION")
+                soundStop(IDX_SOUND_ENGINE, 0)
+                SoundPath = CFG_Sound_NotchSoundPath + (HighIdling ? "/shutdown_high.wav" : "/shutdown_low.wav")
+                TimerName = "ENGINE_SHUTDOWN_FINISH"
+            }
+            
+            soundStop(IDX_SOUND_ENGINE)
+            HOLO_ENT_SOUND_ENGINE:soundPlay(IDX_SOUND_ENGINE, 0, SoundPath)
+            soundLevel(IDX_SOUND_ENGINE, CFG_Sound_EngineLevel)
+            if (CFG_Sound_EnableEngineDSP) {
+                soundStop(IDX_SOUND_ENGINE_DISTANT)
+                entity():soundPlay(IDX_SOUND_ENGINE_DISTANT, 0, SoundPath)
+                soundLevel(IDX_SOUND_ENGINE_DISTANT, CFG_Sound_DistantLevel)
+                soundDSP(IDX_SOUND_ENGINE_DISTANT, CFG_Sound_DistantDSP)
+            }
+            timer(TimerName, soundDuration(SoundPath) * 1000)
+        }
+    }
+
+    # Soft-toggle the handbrake (input is a keyboard key/non-toggle)
+    # Also toggle on if the bogies are rewired
+    # Also redo the bogey holo if CFG_Holo_Bogies is 1
+    local BogiesRewired = ~EngineBogey1 | ~EngineBogey2
+    if (BogiesRewired | (~Control_Handbrake & Control_Handbrake)) {
+        HandbrakeOn = BogiesRewired | (HandbrakeOn ? 0 : 1)
+        local SoundToPlay = HandbrakeOn ? CFG_Sound_Handbrake_On : CFG_Sound_Handbrake_Off
+        local PhysPropToApply = HandbrakeOn ? CFG_Operation_PhysProp_Handbrake : CFG_Operation_PhysProp_NoBrakes
+        if (->EngineBogey1) {
+            EngineBogey1:soundPlay(IDX_SOUND_HANDBRAKE_FRONT, 0, SoundToPlay)
+            EngineBogey1:propPhysicalMaterial(PhysPropToApply)
+            holo_cloneBogey(EngineBogey1, IDX_HOLO_BOGEY_1)
+        }
+        if (->EngineBogey2) {
+            EngineBogey2:soundPlay(IDX_SOUND_HANDBRAKE_REAR, 0, SoundToPlay)
+            EngineBogey2:propPhysicalMaterial(PhysPropToApply)
+            holo_cloneBogey(EngineBogey2, IDX_HOLO_BOGEY_2)
+        }
+    }
+    
+    # What happens when the player gets in or out of the "Active" seat when _DoEngineStartProcedures is off?
+    # (We make it behave like OLC)
+    if (~Active & !CFG_Operation_DoEngineStartProcedures) {
+        if (Active) {
+            State_EngineMoment = 2
+            soundStop(IDX_SOUND_ENGINE, 0)
+            HOLO_ENT_SOUND_ENGINE:soundPlay(IDX_SOUND_ENGINE, 0, CFG_Sound_EngineLoop)
+            soundPitch(IDX_SOUND_ENGINE, 100 + abs(Throttle) / 2)
+        } else {
+            State_EngineMoment = 0
+            soundStop(IDX_SOUND_ENGINE, 0)
+        }
+    }
+}
+
+elseif (first() | dupefinished()) {
+    # Holo the bogies on.
+    if (CFG_Holo_Bogies) {
+        if (EngineBogey1) {
+            holo_cloneBogey(EngineBogey1, IDX_HOLO_BOGEY_1)
+        }
+        if (EngineBogey2) {
+            holo_cloneBogey(EngineBogey2, IDX_HOLO_BOGEY_2)
+        }
+    }
+}

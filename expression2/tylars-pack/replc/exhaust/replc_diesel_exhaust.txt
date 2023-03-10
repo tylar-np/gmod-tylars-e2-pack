@@ -1,0 +1,89 @@
+@name RepLC Diesel Exhaust
+
+#[
+    RepLC Diesel Exhaust
+    Shipped with RepLC 0.0.6 but compatible with anything with a "max MPH", "Speed MPH" and "target MPH" output.
+    
+    Instructions:
+        - Place particle controllers where you want the exhaust particles to emit from.
+        - Wire the inputs of each controller to the outputs of this exhaust chip (excluding RepeatInterval).
+        - Wire the inputs of this exhaust chip to the same-named outputs of the RepLC chip.
+]#
+
+@inputs [EngineStateCode HighIdling Notch SpeedMPH SpeedMPHMax TargetSpeedMPH]:number
+@outputs [Effect]:string [A]:number
+
+@persist [Effect]:string [A CFG_Exhaust_Adjust_Ratio CFG_Max_Exhaust_Level]:number
+@trigger EngineStateCode HighIdling Notch
+
+
+
+
+# ====================================================================
+# ==  CONFIG  ========================================================
+# ====================================================================
+function void config() {
+    
+    CFG_Max_Exhaust_Level = 5 # 1 to 6, 6 is thicker.
+    CFG_Exhaust_Adjust_Ratio = 0.4 # Higher makes it harder to have heavier clag.
+    
+}
+
+
+
+
+
+# ====================================================================
+# ==  No need to edit below this line!  ==============================
+# ====================================================================
+
+
+
+
+
+
+# Assess changes due to current and target speeds in here.
+if (clk()) {
+    if ((Notch > 0) & A) {
+        local Target = ceil((TargetSpeedMPH - SpeedMPH) / ((max(0, SpeedMPHMax) / (CFG_Max_Exhaust_Level)) * CFG_Exhaust_Adjust_Ratio))
+        Effect = format("clag_4stroke_%d", max(0, min(Target, CFG_Max_Exhaust_Level)))
+    }
+    
+    interval(500)
+}
+
+
+
+# Handle triggered inputs.
+elseif (inputClk()) {
+    if (~EngineStateCode) {
+        A = EngineStateCode == 1 || EngineStateCode == 2
+    } elseif ((~HighIdling || ~Notch) & (Notch == 0)) {
+        Effect = format("clag_4stroke_%d", (HighIdling ? 1 : 0))
+    }
+}
+
+
+
+# Clag reboot
+elseif (clkName() == "postreboot") {
+    A = EngineStateCode == 1 || EngineStateCode == 2
+    timer("reboot", 5000)
+}
+
+elseif (clkName() == "reboot") {
+    A = 0
+    timer("postreboot", 1)
+}
+
+
+
+elseif (first() | dupefinished()) {
+    config()
+    CFG_Max_Exhaust_Level = max(1, min(CFG_Max_Exhaust_Level, 6))
+    CFG_Exhaust_Adjust_Ratio = max(0.01, min(CFG_Exhaust_Adjust_Ratio, 10))
+    Effect = "clag_4stroke_0"
+    A = EngineStateCode == 1 || EngineStateCode == 2
+    timer("reboot", 5000)
+    interval(500)
+}
