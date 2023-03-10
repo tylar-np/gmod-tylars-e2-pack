@@ -1,5 +1,5 @@
     # Cubic's Materials Pack - dt&i numbers
-    FontRegistry["cubic_numbers_dt&i", table] = table(
+    FontRegistry["cubic_numbers_dti", table] = table(
         "pretransformchar" = array(TIdentity),
         "basepath" = "cubics_pack/numbers/dt&i/",
         "getpath" = array(VNumeric),
