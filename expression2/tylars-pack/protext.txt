@@ -178,7 +178,7 @@ function void loadFontFromFile(FontName:string) {
         case "cubic_numbers_cr3",                   #include "tylars-pack/fonts/font_cubic_numbers_cr3", break
         case "cubic_numbers_cts",                   #include "tylars-pack/fonts/font_cubic_numbers_cts", break
         case "cubic_numbers_cutecuddly",            #include "tylars-pack/fonts/font_cubic_numbers_cutecuddly", break
-        case "cubic_numbers_dt&i",                  #include "tylars-pack/fonts/font_cubic_numbers_dt&i", break
+        case "cubic_numbers_dti",                  #include "tylars-pack/fonts/font_cubic_numbers_dti", break
         case "cubic_numbers_empire_builder",        #include "tylars-pack/fonts/font_cubic_numbers_empire_builder", break
         case "cubic_numbers_erie_roman",            #include "tylars-pack/fonts/font_cubic_numbers_erie_roman", break
         case "cubic_numbers_franklin_gothic",       #include "tylars-pack/fonts/font_cubic_numbers_franklin_gothic", break
