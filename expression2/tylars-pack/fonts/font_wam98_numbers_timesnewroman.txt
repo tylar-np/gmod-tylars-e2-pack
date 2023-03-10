@@ -1,0 +1,10 @@
+    # WAM's and Kei's Train Pack - Numbers (Times New Roman/CMQ)
+    FontRegistry["wam98_numbers_timesnewroman", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath_numeric" = "wam98_textures/cmq/times_new_roman/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.02
+        )
+    )
+    

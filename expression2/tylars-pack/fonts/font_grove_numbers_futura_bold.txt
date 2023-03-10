@@ -1,0 +1,10 @@
+    # Grove's Shared Textures - Futura Bold (Numbers)
+    FontRegistry["grove_numbers_futura_bold", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "railwaylogos/generic/numbers_futura_bold/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.05
+        )
+    )
+    

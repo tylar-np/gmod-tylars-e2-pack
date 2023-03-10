@@ -1,0 +1,10 @@
+    # Jinty's Texture Pack - Bevan (Numbers)
+    FontRegistry["jinty_numbers_bevan", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "just number fonts/bevan/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.03
+        )
+    )
+    

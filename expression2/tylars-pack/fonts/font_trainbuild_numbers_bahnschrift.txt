@@ -1,0 +1,10 @@
+    # Gmod Trainbuild Public Decal Pack - Bahnschrift (Numbers)
+    FontRegistry["trainbuild_numbers_bahnschrift", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "models/logos/fonts/bahnschrift_b_i_sc/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.075
+        )
+    )
+    

@@ -1,0 +1,19 @@
+    # Grove's Shared Textures - Northern Atlantic (Old) (Numbers)
+    FontRegistry["grove_numbers_na_old", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "railwaylogos/northernatlantic/numbers_old/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "0" = 0.04,
+            "1" = -0.01,
+            "2" = 0.04,
+            "3" = 0.04,
+            "4" = 0.04,
+            "5" = 0.04,
+            "6" = 0.02,
+            "7" = 0.04,
+            "8" = 0.02,
+            "9" = 0.04
+        )
+    )
+    

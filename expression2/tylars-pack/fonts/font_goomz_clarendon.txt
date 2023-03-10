@@ -1,0 +1,38 @@
+    # Goomz's Mediocre Models - Clarendon Bold (serif)
+    FontRegistry["goomz_clarendon", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "goomzmodels/fonts/clarendon_bt/cbt_",
+        "getpath" = array(VAlpha, VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.02,
+            "a" = 0.02,
+            "b" = 0.02,
+            "c" = 0.02,
+            "d" = 0.04,
+            "e" = 0.04,
+            "g" = 0.04,
+            "h" = 0.02,
+            "i" = -0.07,
+            "i" = -0.03,
+            "k" = 0.035,
+            "m" = 0.07,
+            "n" = 0.035,
+            "o" = 0.03,
+            "q" = 0.04,
+            "r" = 0.02,
+            "t" = 0.03,
+            "u" = 0.02,
+            "w" = 0.08,
+            "x" = 0.05,
+            "0" = 0.02,
+            "2" = 0.02,
+            "3" = 0.02,
+            "4" = 0.02,
+            "5" = 0.02,
+            "6" = 0.02,
+            "7" = 0.02,
+            "8" = 0.02,
+            "9" = 0.02
+        )
+    )
+    

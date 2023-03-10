@@ -1,0 +1,19 @@
+    # Cubic's Materials Pack - bou_western numbers
+    FontRegistry["cubic_numbers_bou_western", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "cubics_pack/numbers/bou_western/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "0" = 0.02,
+            "1" = -0.03,
+            "2" = 0.02,
+            "3" = 0.02,
+            "4" = 0.02,
+            "5" = 0.02,
+            "6" = 0.02,
+            "7" = 0.02,
+            "8" = 0.02,
+            "9" = 0.02
+        )
+    )
+    

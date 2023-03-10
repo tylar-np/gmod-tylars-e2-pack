@@ -1,0 +1,10 @@
+    # Fox's Train Sounds And Models - Numbers (Carbono)
+    FontRegistry["foxfuuka_numbers_carbono", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "foxes_pack/numbers_carbono/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.1
+        )
+    )
+    

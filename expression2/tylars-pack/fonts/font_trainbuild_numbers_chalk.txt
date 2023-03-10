@@ -1,0 +1,8 @@
+    # Gmod Trainbuild Public Decal Pack - Chalk (Numbers)
+    FontRegistry["trainbuild_numbers_chalk", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "models/logos/fonts/chalk01/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table()
+    )
+    

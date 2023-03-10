@@ -1,0 +1,19 @@
+    # Cubic's Materials Pack - ches numbers
+    FontRegistry["cubic_numbers_ches", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "cubics_pack/numbers/ches/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "0" = 0.06,
+            "1" = -0.03,
+            "2" = 0.02,
+            "3" = 0.02,
+            "4" = 0.02,
+            "5" = 0.02,
+            "6" = 0.02,
+            "7" = 0.02,
+            "8" = 0.02,
+            "9" = 0.02
+        )
+    )
+    

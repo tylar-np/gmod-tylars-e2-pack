@@ -1,0 +1,19 @@
+    # Cubic's Materials Pack - bpg_num numbers
+    FontRegistry["cubic_numbers_bpg_num", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "cubics_pack/numbers/bpg_num/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "0" = 0.02,
+            "1" = -0.01,
+            "2" = 0.02,
+            "3" = 0.02,
+            "4" = 0.02,
+            "5" = 0.02,
+            "6" = 0.02,
+            "7" = 0.02,
+            "8" = 0.02,
+            "9" = 0.02
+        )
+    )
+    

@@ -1,0 +1,10 @@
+    # Grove's Shared Textures - NRC/CA (Numbers)
+    FontRegistry["grove_numbers_ca", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "railwaylogos/nrc/ca_numbers/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.03
+        )
+    )
+    

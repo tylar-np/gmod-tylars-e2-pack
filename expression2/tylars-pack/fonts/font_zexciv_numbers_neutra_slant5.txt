@@ -1,0 +1,19 @@
+    # ZeXCiV's trainbuild bits n bobs - Neutra (Numbers)
+    FontRegistry["zexciv_numbers_neutra_slant5", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath_numeric" = "fonts/neutra_numbers/",
+        "getpath" = array(VZexcivNeutraSlant5),
+        "kerning_margin_x" = table(
+            "0" = 0.08,
+            "1" = -0.02,
+            "2" = 0.04,
+            "3" = 0.04,
+            "4" = 0.04,
+            "5" = 0.04,
+            "6" = 0.04,
+            "7" = 0.04,
+            "8" = 0.02,
+            "9" = 0.04
+        )
+    )
+

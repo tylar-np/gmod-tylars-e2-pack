@@ -1,0 +1,24 @@
+    # Cubic's Materials Pack - Clarendon (serif)
+    FontRegistry["cubic_clarendon", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "cubics_pack/fonts/clarendon/",
+        "getpath" = array(VAlpha),
+        "kerning_margin_x" = table(
+            "a" = 0.01,
+            "e" = -0.0225,
+            "f" = -0.0225,
+            "h" = -0.01,
+            "i" = -0.06,
+            "j" = -0.01,
+            "m" = 0.025,
+            "n" = 0.025,
+            "o" = 0,
+            "p" = -0.02,
+            "q" = 0.04,
+            "r" = -0.02,
+            "s" = -0.0225,
+            "t" = -0.01,
+            "w" = 0.07
+        )
+    )
+    

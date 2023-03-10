@@ -1,0 +1,33 @@
+    # Powertrain's Materials Pack - N&W old-style font
+    local MGN = 0.09
+    FontRegistry["powertrain_nw", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath_alpha" = "powertrain/logos/n&w/letters/",
+        "basepath_numeric" = "powertrain/logos/n&w/numbers/",
+        "getpath" = array(VNumeric, VPowertrainNW),
+        "kerning_margin_x" = table(
+            "0" = MGN,
+            "1" = MGN,
+            "2" = MGN,
+            "3" = MGN,
+            "4" = MGN,
+            "5" = MGN,
+            "6" = MGN,
+            "7" = MGN,
+            "8" = MGN,
+            "9" = MGN,
+            "n" = MGN,
+            "o" = MGN,
+            "r" = MGN,
+            "f" = MGN,
+            "l" = MGN,
+            "k" = MGN,
+            "a" = MGN,
+            "d" = MGN,
+            "w" = MGN,
+            "e" = MGN,
+            "s" = MGN,
+            "t" = MGN
+        )
+    )
+    

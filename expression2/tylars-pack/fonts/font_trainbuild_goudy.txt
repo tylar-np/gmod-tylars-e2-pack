@@ -1,0 +1,25 @@
+    # Gmod Trainbuild Public Decal Pack - Goudy Old Style
+    FontRegistry["trainbuild_goudy", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "models/logos/fonts/goudy_old_style/",
+        "getpath" = array(VAlpha, VCommonGoudySymbols),
+        "kerning_margin_x" = table(
+            "a" = 0.01,
+            "b" = -0.0225,
+            "e" = -0.0225,
+            "f" = -0.0425,
+            "h" = -0.01,
+            "i" = -0.075,
+            "j" = -0.075,
+            "m" = 0.025,
+            "p" = -0.02,
+            "r" = -0.02,
+            "s" = -0.0425,
+            "w" = 0.075,
+            "z" = -0.0425,
+            "," = -0.125,
+            "'" = -0.125,
+            "&" = 0.025
+        )
+    )
+    

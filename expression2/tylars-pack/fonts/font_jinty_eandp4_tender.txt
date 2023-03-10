@@ -1,0 +1,19 @@
+    # Jinty's Texture Pack - Empire & Palisade #4's Tender font ("Egyptian")
+    FontRegistry["jinty_eandp4_tender", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "old_america/fonts/egyptian/",
+        "getpath" = array(VAlpha, VNumeric),
+        "kerning_margin_x" = table(
+            "a" = -0.02,
+            "i" = -0.08,
+            "l" = -0.02,
+            "o" = -0.02,
+            "s" = -0.02,
+            "v" = -0.02,
+            "w" = 0.02
+        ),
+        "kerning_margin_top" = table(
+            #"q" = 0.045
+        )
+    )
+    

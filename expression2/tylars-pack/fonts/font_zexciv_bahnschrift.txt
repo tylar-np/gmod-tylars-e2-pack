@@ -1,0 +1,46 @@
+    # ZeXCiV's trainbuild bits n bobs - Bahnschrift
+    FontRegistry["zexciv_bahnschrift", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "fonts/bahnschrift/",
+        "getpath" = array(VAlpha, VNumeric),
+        "kerning_margin_x" = table(
+            "a" = -0.03,
+            "b" = -0.04,
+            "c" = -0.021,
+            "d" = -0.02,
+            "e" = -0.04,
+            "f" = -0.045,
+            "g" = -0.01,
+            "h" = -0.03,
+            "i" = -0.14,
+            "j" = -0.05,
+            "k" = -0.03,
+            "l" = -0.04,
+            "m" = 0.02,
+            "n" = -0.03,
+            "o" = -0.04,
+            "p" = -0.05,
+            "q" = -0.03,
+            "r" = -0.03,
+            "s" = -0.03,
+            "t" = -0.03,
+            "u" = -0.03,
+            "v" = -0.03,
+            "w" = 0.04,
+            "x" = -0.03,
+            "y" = -0.04,
+            "z" = -0.03,
+            "0" = -0.05,
+            "1" = -0.1,
+            "2" = -0.05,
+            "3" = -0.05,
+            "4" = -0.05,
+            "5" = -0.05,
+            "6" = -0.05,
+            "7" = -0.05,
+            "8" = -0.05,
+            "9" = -0.05
+        )
+    )
+    
+

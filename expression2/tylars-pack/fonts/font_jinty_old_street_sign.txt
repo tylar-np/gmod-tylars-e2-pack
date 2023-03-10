@@ -1,0 +1,45 @@
+    # Jinty's Texture Pack - Old Street Sign
+    FontRegistry["jinty_old_street_sign", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "fonts/oldstreetsign/",
+        "getpath" = array(VAlpha, VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.02,
+            "a" = 0.03,
+            "b" = 0.02,
+            "c" = 0.02,
+            "d" = 0.04,
+            "e" = 0.04,
+            "g" = 0.04,
+            "h" = 0.03,
+            "i" = -0.04,
+            "j" = -0.01,
+            "k" = 0.035,
+            "l" = 0.04,
+            "m" = 0.1,
+            "n" = 0.035,
+            "o" = 0.01,
+            "q" = 0.04,
+            "r" = 0.02,
+            "t" = 0.03,
+            "u" = 0.04,
+            "v" = 0.03,
+            "w" = 0.08,
+            "x" = 0.01,
+            "y" = 0.02,
+            "z" = 0.02,
+            "0" = 0.02,
+            "2" = 0.02,
+            "3" = 0.02,
+            "4" = 0.02,
+            "5" = 0.02,
+            "6" = 0.02,
+            "7" = 0.02,
+            "8" = 0.02,
+            "9" = 0.02
+        ),
+        "kerning_margin_top" = table(
+            "q" = 0.03
+        )
+    )
+    

@@ -1,0 +1,29 @@
+    local SMQMargin = 0.065
+    # Grove's Shared Textures - SMQ (Numbers)
+    FontRegistry["grove_numbers_smq", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "railwaylogos/smq/numbers/",
+        "getpath" = array(VNumeric, VGroveSMQ),
+        "kerning_margin_x" = table(
+            "1" = -0.02,
+            "a" = SMQMargin,
+            "b" = SMQMargin,
+            "c" = SMQMargin,
+            "d" = SMQMargin,
+            "f" = SMQMargin,
+            "r" = SMQMargin,
+            "s" = SMQMargin,
+            
+            "0" = 0.02,
+            "2" = SMQMargin,
+            "3" = SMQMargin,
+            "4" = SMQMargin,
+            "5" = SMQMargin,
+            "6" = SMQMargin,
+            "7" = SMQMargin,
+            "8" = SMQMargin,
+            "9" = SMQMargin,
+            "-" = -0.03
+        )
+    )
+    

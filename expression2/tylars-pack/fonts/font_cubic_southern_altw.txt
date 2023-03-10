@@ -1,0 +1,14 @@
+    # Cubic's Materials Pack - southern diesel (alternate angular W character)
+    FontRegistry["cubic_southern_altw", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "cubics_pack/fonts/southern_diesel/",
+        "getpath" = array(VAlpha, VCubicSouthernW2),
+        "kerning_margin_x" = table(
+            "e" = -0.015,
+            "i" = -0.115,
+            "w" = 0.04,
+            "x" = -0.015,
+            "y" = -0.025
+        )
+    )
+    

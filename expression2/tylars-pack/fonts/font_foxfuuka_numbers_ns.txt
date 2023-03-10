@@ -1,0 +1,10 @@
+    # Fox's Train Sounds And Models - NS numbers
+    FontRegistry["foxfuuka_numbers_ns", table] = table(
+        "pretransformchar" = array(TIdentity),
+        "basepath" = "class 1s/ns/",
+        "getpath" = array(VNumeric),
+        "kerning_margin_x" = table(
+            "1" = -0.1
+        )
+    )
+    

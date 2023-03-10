@@ -1,0 +1,11 @@
+    # Grove's Shared Textures - NRC/ICG (Numbers)
+    FontRegistry["grove_numbers_icg", table] = table(
+        "pretransformchar" = array(TLower),
+        "basepath" = "railwaylogos/nrc/icg_numbers/",
+        "getpath" = array(VNumeric, VGroveICG),
+        "kerning_margin_x" = table(
+            "1" = -0.04,
+            "-" = -0.04
+        )
+    )
+    
