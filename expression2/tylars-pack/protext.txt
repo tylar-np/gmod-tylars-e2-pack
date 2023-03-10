@@ -1,4 +1,4 @@
-@name Tylar's ProText 1.0.0
+@name Tylar's ProText 1.0.1
 @inputs [Parent]:entity
 @persist [CONFIG FontRegistry]:table
 @persist [ENT]:entity
